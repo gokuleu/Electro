@@ -16,7 +16,7 @@ extern CAN_TxHeaderTypeDef TxHeader;
 extern CAN_RxHeaderTypeDef RxHeader;
 extern CAN_HandleTypeDef hcan;
 
-void Transmit_On_CAN(uint16_t id, uint8_t data[8]);
+void Transmit_On_CAN(uint32_t id, uint8_t data[8]);
 void Send_on_CAN();
 
 #endif /* INC_CAN_H_ */

@@ -1,19 +1,48 @@
 #include <CAN.h>
 #include "main.h"
 
+#define NTC_PULL_UP_RESISTOR 10000
+#define Adc_max_COUNT 4095
+#define T_AMBIENT 25
+#define KELVIN_TO_CELSIUS 273.15
+#define BETA_VALUE 3984
+#define TEMP_AVG 1
 CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
 extern CAN_HandleTypeDef hcan;
 extern uint16_t ADC_VAL[7];
 
+
 uint8_t RxData[8];
 uint8_t TxData[8];
+float temp_out;
+
+float moving_Temperature_measured_fun_M( float current_val , float MOV_AVG_SAMPLE)   // 0.1 amp Batt_current_measured
+{
+    static float Prev_current_val;
+    float Bus_Current_Error_value;
+    Bus_Current_Error_value = (current_val - Prev_current_val);
+    Prev_current_val += (Bus_Current_Error_value / MOV_AVG_SAMPLE);
+    current_val = Prev_current_val ;
+    return current_val ;
+}
 
 void Send_on_CAN(){
 	  uint32_t time_count = HAL_GetTick();
 	  static uint32_t Prev_time = 0;
+	  uint8_t tempxxxx;
 	  if(time_count - Prev_time > 100){
 		  	Prev_time = time_count;
+		  	double resistance = (ADC_VAL[4] * NTC_PULL_UP_RESISTOR)/(Adc_max_COUNT - ADC_VAL[4]);
+		  	     double temp_K = resistance/NTC_PULL_UP_RESISTOR;
+		  	     temp_K = log(temp_K);
+		  	     temp_K /= BETA_VALUE;
+		  	     temp_K += 1.0/(T_AMBIENT + KELVIN_TO_CELSIUS);
+		  	     temp_K = 1.0/temp_K;
+		  	     temp_K -= KELVIN_TO_CELSIUS;
+		  	   temp_out = moving_Temperature_measured_fun_M(temp_K, TEMP_AVG);
+		  	 tempxxxx=temp_out;
+
 
 		  	TxData[0] = ADC_VAL[0]&0xff;
 		  	TxData[1] = (ADC_VAL[0]&0xff00)>>8;
@@ -22,16 +51,17 @@ void Send_on_CAN(){
 		  	TxData[4] = ADC_VAL[2]&0xff;
 		  	TxData[5] = (ADC_VAL[2]&0xff00)>>8;
 		  	TxData[6] = ADC_VAL[3]&0xff;
-		  	TxData[7] = (ADC_VAL[3]&0xff00)>>8;
+		  	TxData[7] = tempxxxx;
 
-		  	Transmit_On_CAN(0x123, TxData);
+		  	Transmit_On_CAN(0x18FF50E5, TxData);
+		  	Transmit_On_CAN(0x18FF50E6, TxData);
 		  }
 }
 
-void Transmit_On_CAN(uint16_t id, uint8_t data[8]){
+void Transmit_On_CAN(uint32_t id, uint8_t data[8]){
 	CAN_TxHeaderTypeDef TxHeader = {
-			.StdId = id,
-			.IDE = CAN_ID_STD,
+			.ExtId = id,
+			.IDE = CAN_ID_EXT,
 		    .RTR = CAN_RTR_DATA,
 		    .DLC = 8	,
 		    .TransmitGlobalTime = DISABLE

@@ -50,6 +50,8 @@ TIM_HandleTypeDef htim15;
 /* USER CODE BEGIN PV */
 uint16_t ADC_VAL[7];
 volatile int count = 0;
+uint16_t voltage;
+uint16_t temp1;
 
 
 /* USER CODE END PV */
@@ -117,6 +119,10 @@ int main(void)
   {
 	Send_on_CAN();
 	count++;
+//	voltage=(420/4096)*ADC_VAL[2];
+	voltage=ADC_VAL[2];
+	temp1=ADC_VAL[4];
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
