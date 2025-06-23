@@ -10,7 +10,7 @@
 CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
 extern CAN_HandleTypeDef hcan;
-extern uint16_t ADC_VAL[7];
+extern uint16_t ADC_VAL_1[7];
 
 
 uint8_t RxData[8];
@@ -33,7 +33,7 @@ void Send_on_CAN(){
 	  uint8_t tempxxxx;
 	  if(time_count - Prev_time > 100){
 		  	Prev_time = time_count;
-		  	double resistance = (ADC_VAL[4] * NTC_PULL_UP_RESISTOR)/(Adc_max_COUNT - ADC_VAL[4]);
+		  	double resistance = (ADC_VAL_1[4] * NTC_PULL_UP_RESISTOR)/(Adc_max_COUNT - ADC_VAL_1[4]);
 		  	     double temp_K = resistance/NTC_PULL_UP_RESISTOR;
 		  	     temp_K = log(temp_K);
 		  	     temp_K /= BETA_VALUE;
@@ -44,13 +44,13 @@ void Send_on_CAN(){
 		  	 tempxxxx=temp_out;
 
 
-		  	TxData[0] = ADC_VAL[0]&0xff;
-		  	TxData[1] = (ADC_VAL[0]&0xff00)>>8;
-		  	TxData[2] = ADC_VAL[1]&0xff;
-		  	TxData[3] = (ADC_VAL[1]&0xff00)>>8;
-		  	TxData[4] = ADC_VAL[2]&0xff;
-		  	TxData[5] = (ADC_VAL[2]&0xff00)>>8;
-		  	TxData[6] = ADC_VAL[3]&0xff;
+		  	TxData[0] = ADC_VAL_1[0]&0xff;
+		  	TxData[1] = (ADC_VAL_1[0]&0xff00)>>8;
+		  	TxData[2] = ADC_VAL_1[1]&0xff;
+		  	TxData[3] = (ADC_VAL_1[1]&0xff00)>>8;
+		  	TxData[4] = ADC_VAL_1[2]&0xff;
+		  	TxData[5] = (ADC_VAL_1[2]&0xff00)>>8;
+		  	TxData[6] = ADC_VAL_1[3]&0xff;
 		  	TxData[7] = tempxxxx;
 
 		  	Transmit_On_CAN(0x18FF50E5, TxData);
