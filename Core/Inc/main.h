@@ -87,6 +87,18 @@ void Error_Handler(void);
 #define PWM_SR_HS2_GPIO_Port GPIOB
 #define PWM_SR_LS1_Pin GPIO_PIN_13
 #define PWM_SR_LS1_GPIO_Port GPIOB
+#define PWM_SR_HS1_Pin GPIO_PIN_14
+#define PWM_SR_HS1_GPIO_Port GPIOB
+#define PWM_SR_LS2_Pin GPIO_PIN_15
+#define PWM_SR_LS2_GPIO_Port GPIOB
+#define PWM_FB_HS1_Pin GPIO_PIN_8
+#define PWM_FB_HS1_GPIO_Port GPIOA
+#define PWM_FB_LS1_Pin GPIO_PIN_9
+#define PWM_FB_LS1_GPIO_Port GPIOA
+#define PWM_FB_HS2_Pin GPIO_PIN_10
+#define PWM_FB_HS2_GPIO_Port GPIOA
+#define PWM_FB_LS2_Pin GPIO_PIN_11
+#define PWM_FB_LS2_GPIO_Port GPIOA
 #define SD_OD_output_Pin GPIO_PIN_11
 #define SD_OD_output_GPIO_Port GPIOC
 
