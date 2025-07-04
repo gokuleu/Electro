@@ -48,8 +48,8 @@ void Send_on_CAN(){
 		  	TxData[1] = (ADC_VAL_1[0]&0xff00)>>8;
 		  	TxData[2] = ADC_VAL_1[1]&0xff;
 		  	TxData[3] = (ADC_VAL_1[1]&0xff00)>>8;
-		  	TxData[4] = ADC_VAL_1[2]&0xff;
-		  	TxData[5] = (ADC_VAL_1[2]&0xff00)>>8;
+		  	TxData[4] = ADC_VAL_1[7]&0xff;
+		  	TxData[5] = (ADC_VAL_1[7]&0xff00)>>8;
 		  	TxData[6] = ADC_VAL_1[3]&0xff;
 		  	TxData[7] = tempxxxx;
 
@@ -81,7 +81,37 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *CanHandle)
 		Error_Handler();
 	}
 
-	if(RxHeader.StdId == 0x001){
+
+	if(RxHeader.StdId == 0x4FF){
+		float rx_data_1=RxData[0]; 
+		// uint16_t data =((RxData[1]<<8))|((RxData[0]));
+		uint16_t data=4096000000.0f/(rx_data_1*2000.0f);
+		float percent = RxData[1]*0.005;
+		uint16_t deadtime = (float)(percent*data);
+		HRTIM1->sMasterRegs.MPER = data;
+		
+		// Read-modify-write to preserve other bits
+		deadtime=0x20;
+uint32_t temp = HRTIM1_TIMA->DTxR;
+
+temp &= ~HRTIM_DTR_DTR_Msk;           // Clear rising bits
+temp |= (deadtime & 0x1FF);            // Set new rising time
+
+temp &= ~HRTIM_DTR_DTF_Msk;           // Clear falling bits
+temp |= ((deadtime & 0x1FF) << 16);    // Set new falling time
+
+HRTIM1_TIMB->DTxR = temp;
+// Read-modify-write to preserve other bits
+temp = HRTIM1_TIMB->DTxR;
+
+temp &= ~HRTIM_DTR_DTR_Msk;           // Clear rising bits
+temp |= (deadtime & 0x1FF);            // Set new rising time
+
+temp &= ~HRTIM_DTR_DTF_Msk;           // Clear falling bits
+temp |= ((deadtime & 0x1FF) << 16);    // Set new falling time
+
+HRTIM1_TIMB->DTxR = temp;
+
 
 	}
 
