@@ -7,6 +7,7 @@
 #define KELVIN_TO_CELSIUS 273.15
 #define BETA_VALUE 3984
 #define TEMP_AVG 1
+#define deadtime_timerperiod 1/64 
 CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
 extern CAN_HandleTypeDef hcan;
@@ -80,35 +81,46 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *CanHandle)
 	if (HAL_CAN_GetRxMessage (CanHandle, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK){
 		Error_Handler();
 	}
+	if(RxData[2]==0x01){
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
+	}
+	else{
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);
+	}
 
 
 	if(RxHeader.StdId == 0x4FF){
 		float rx_data_1=RxData[0]; 
+		float rx_data_2=RxData[1]; //percent
 		// uint16_t data =((RxData[1]<<8))|((RxData[0]));
 		uint16_t data=4096000000.0f/(rx_data_1*2000.0f);
-		float percent = RxData[1]*0.005;
-		uint16_t deadtime = (float)(percent*data);
+		// float percent = RxData[1]*0.005;
+		// float deadtime_1= (float)(((float)(1/(rx_data_1*2*RxData[1]*1000)))/(deadtime_timerperiod));  // x percent
+		float deadtime_1= (float)((320.0f*rx_data_2)/(rx_data_1));  // x percent
+		uint16_t deadtime=deadtime_1;
+		// uint16_t deadtime = (float)(percent*data);
 		HRTIM1->sMasterRegs.MPER = data;
 		
 		// Read-modify-write to preserve other bits
-		deadtime=0x20;
 uint32_t temp = HRTIM1_TIMA->DTxR;
 
 temp &= ~HRTIM_DTR_DTR_Msk;           // Clear rising bits
 temp |= (deadtime & 0x1FF);            // Set new rising time
 
-temp &= ~HRTIM_DTR_DTF_Msk;           // Clear falling bits
-temp |= ((deadtime & 0x1FF) << 16);    // Set new falling time
+//temp &= ~HRTIM_DTR_DTF_Msk;           // Clear falling bits
+//temp |= ((deadtime & 0x1FF) << 16);    // Set new falling time
 
-HRTIM1_TIMB->DTxR = temp;
+HRTIM1_TIMA->DTxR = temp;
+
+temp=0;
 // Read-modify-write to preserve other bits
 temp = HRTIM1_TIMB->DTxR;
 
 temp &= ~HRTIM_DTR_DTR_Msk;           // Clear rising bits
 temp |= (deadtime & 0x1FF);            // Set new rising time
 
-temp &= ~HRTIM_DTR_DTF_Msk;           // Clear falling bits
-temp |= ((deadtime & 0x1FF) << 16);    // Set new falling time
+//temp &= ~HRTIM_DTR_DTF_Msk;           // Clear falling bits
+//temp |= ((deadtime & 0x1FF) << 16);    // Set new falling time
 
 HRTIM1_TIMB->DTxR = temp;
 

@@ -559,8 +559,8 @@ static void MX_HRTIM1_Init(void)
   {
     Error_Handler();
   }
-  pDeadTimeCfg.Prescaler = HRTIM_TIMDEADTIME_PRESCALERRATIO_DIV1;
-  pDeadTimeCfg.RisingValue = 0x001;
+  pDeadTimeCfg.Prescaler = HRTIM_TIMDEADTIME_PRESCALERRATIO_DIV2;
+  pDeadTimeCfg.RisingValue = 100;
   pDeadTimeCfg.RisingSign = HRTIM_TIMDEADTIME_RISINGSIGN_POSITIVE;
   pDeadTimeCfg.RisingLock = HRTIM_TIMDEADTIME_RISINGLOCK_WRITE;
   pDeadTimeCfg.RisingSignLock = HRTIM_TIMDEADTIME_RISINGSIGNLOCK_WRITE;
@@ -572,12 +572,10 @@ static void MX_HRTIM1_Init(void)
   {
     Error_Handler();
   }
-  pDeadTimeCfg.RisingValue = 0x000;
   if (HAL_HRTIM_DeadTimeConfig(&hhrtim1, HRTIM_TIMERINDEX_TIMER_B, &pDeadTimeCfg) != HAL_OK)
   {
     Error_Handler();
   }
-  pDeadTimeCfg.Prescaler = HRTIM_TIMDEADTIME_PRESCALERRATIO_DIV2;
   pDeadTimeCfg.RisingValue = 510;
   pDeadTimeCfg.FallingValue = 510;
   if (HAL_HRTIM_DeadTimeConfig(&hhrtim1, HRTIM_TIMERINDEX_TIMER_C, &pDeadTimeCfg) != HAL_OK)
