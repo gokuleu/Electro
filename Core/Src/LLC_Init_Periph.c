@@ -40,10 +40,14 @@
 /* Private define ------------------------------------------------------------*/
 #define WDG_OUT_VOLTAGE_MAX                     OUT_VOLT_ADC_VALUE(56)          /**< max voltage for output overvoltage fault detection [V] if VOUT_ANALOG_WATCHDOG_ENABLED is defined */
 
+  
+
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 static void HRTIM_ClearHandle(HRTIM_HandleTypeDef *hhrtim);
+static DMA_HandleTypeDef  hdma_adc1;
+  static DMA_HandleTypeDef  hdma_adc2;
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -171,6 +175,49 @@ void GPIO_Config(void)
 void ADC_Config(void)
 {
   ADC_ChannelConfTypeDef sConfig1, sConfig2;
+  
+
+  // __HAL_RCC_DMA1_CLK_ENABLE();  // Enable DMA1 clock (or DMA2 if needed)
+
+  // /*** ADC1 DMA Init ***/
+  // hdma_adc1.Instance                 = DMA1_Channel1;
+  // hdma_adc1.Init.Direction           = DMA_PERIPH_TO_MEMORY;
+  // hdma_adc1.Init.PeriphInc           = DMA_PINC_DISABLE;
+  // hdma_adc1.Init.MemInc              = DMA_MINC_ENABLE;
+  // hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+  // hdma_adc1.Init.MemDataAlignment    = DMA_MDATAALIGN_HALFWORD;
+  // hdma_adc1.Init.Mode                = DMA_CIRCULAR;
+  // hdma_adc1.Init.Priority            = DMA_PRIORITY_HIGH;
+  
+  // if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
+  // {
+  //   Init_Error_Handler();
+  // }
+
+  // __HAL_LINKDMA(&AdcHandle1, DMA_Handle, hdma_adc1); // Link DMA to ADC1
+
+  // /*** ADC2 DMA Init ***/
+  // hdma_adc2.Instance                 = DMA1_Channel2;  // Or appropriate channel (may vary by MCU)
+  // hdma_adc2.Init.Direction           = DMA_PERIPH_TO_MEMORY;
+  // hdma_adc2.Init.PeriphInc           = DMA_PINC_DISABLE;
+  // hdma_adc2.Init.MemInc              = DMA_MINC_ENABLE;
+  // hdma_adc2.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+  // hdma_adc2.Init.MemDataAlignment    = DMA_MDATAALIGN_HALFWORD;
+  // hdma_adc2.Init.Mode                = DMA_CIRCULAR;
+  // hdma_adc2.Init.Priority            = DMA_PRIORITY_HIGH;
+  
+  // if (HAL_DMA_Init(&hdma_adc2) != HAL_OK)
+  // {
+  //   Init_Error_Handler();
+  // }
+
+  // __HAL_LINKDMA(&AdcHandle2, DMA_Handle, hdma_adc2); // Link DMA to ADC2
+  // HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+  // HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+
+  // HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
+  // HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
+
   
 #ifdef ADAPTIVE_SYNCH_RECTIFICATION
   ADC_InjectionConfTypeDef sInjConfig1, sInjConfig2;
@@ -407,7 +454,12 @@ void ADC_Config(void)
     /* ADC initialization Error */
     Init_Error_Handler();
   }
-  
+  if (HAL_ADC_Start_DMA(&AdcHandle2, (uint32_t*)&DCDC_MeasureStruct.hTemperature, 1)!= HAL_OK)
+  {
+    /* ADC initialization Error */
+    Init_Error_Handler();
+  }
+
 #ifdef DSMPS_CONTROL_BOARD
   /* start ADCy with DMA request */
 //  if (HAL_ADC_Start_DMA(&AdcHandle2, (uint32_t*)&DCDC_MeasureStruct.hIres, 3)!= HAL_OK)
@@ -1338,4 +1390,13 @@ void USART_Config(void) //for DSMPS B2B Communication
   * @}
   */ 
 
+//   void DMA1_Channel1_IRQHandler(void)
+// {
+//   HAL_DMA_IRQHandler(&hdma_adc1);
+// }
+
+// void DMA1_Channel2_IRQHandler(void)
+// {
+//   HAL_DMA_IRQHandler(&hdma_adc2);
+// }
 /******************** (C) COPYRIGHT STMicroelectronics *******************/

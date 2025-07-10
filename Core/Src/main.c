@@ -101,7 +101,8 @@ int main(void)
   /* Initialize COMP_SR for adaptive SR */
   COMP_AdaptiveSR_Config();
 #endif
-  
+  // HAL_ADC_MspInit(&AdcHandle1);
+  // HAL_ADC_MspInit(&AdcHandle2);
   /* Initialize ADC to be triggered by the HRTIMER */
   ADC_Config(); 
      
@@ -145,7 +146,7 @@ int main(void)
     /* ---------------- */
     /* Fault management */
     /* ---------------- */
-    
+    DCDC_MeasureStruct.hTemperature= ADC2->DR;
     /* Check if a fault has occurred */
     FLT_FaultCheck();
       
@@ -166,6 +167,13 @@ int main(void)
 /** @addtogroup Callbacks
   * @{
   */
+ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+    if (hadc->Instance == ADCx) {
+        // Toggle a pin or set a flag to see DMA transfer completed
+//        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);  // Debug indicator
+    }
+}
 
 /**
   * @brief  DMA conversion complete callback
@@ -185,6 +193,8 @@ static void TransferComplete(DMA_HandleTypeDef *DmaHandle)
 void HAL_HRTIM_RepetitionEventCallback(HRTIM_HandleTypeDef * hhrtim, uint32_t TimerIdx)
 {    
 }
+
+
 
 /**
   * @}

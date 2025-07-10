@@ -47,22 +47,22 @@
 
 /* ----- Fault and burst mode thresholds - for nominal values see LLC_Control_Parameters.h file ----- */
 /* Out Voltage thresholds */
-#define OUT_VOLTAGE_MAX_H               OUT_VOLT_ADC_VALUE(57.6)                                  /**< max voltage for output overvoltage fault detection [V] - if VOUT_ANALOG_WATCHDOG_ENABLED is not defined, otherwise the WDG threshold is WDG_OUT_VOLTAGE_MAX in LLC_Init_Perif.c file */
-#define OUT_VOLTAGE_HYSTERESIS          OUT_VOLT_ADC_VALUE(4.8)                                   /**< hysteresis for output under/over voltage fault detection [V] */
+#define OUT_VOLTAGE_MAX_H               OUT_VOLT_ADC_VALUE(69.6)                                  /**< max voltage for output overvoltage fault detection [V] - if VOUT_ANALOG_WATCHDOG_ENABLED is not defined, otherwise the WDG threshold is WDG_OUT_VOLTAGE_MAX in LLC_Init_Perif.c file */
+#define OUT_VOLTAGE_HYSTERESIS          OUT_VOLT_ADC_VALUE(5.8)                                   /**< hysteresis for output under/over voltage fault detection [V] */
 #define OUT_VOLTAGE_MAX_L               (OUT_VOLTAGE_MAX_H - OUT_VOLTAGE_HYSTERESIS)            /**< min voltage for output overvoltage fault cancellation [V] */
-#define OUT_VOLTAGE_MIN_L               OUT_VOLT_ADC_VALUE(38.4)                                  /**< min voltage for output undervoltage fault detection [V] */
+#define OUT_VOLTAGE_MIN_L               OUT_VOLT_ADC_VALUE(46.4)                                  /**< min voltage for output undervoltage fault detection [V] */
 #define OUT_VOLTAGE_MIN_H               (OUT_VOLTAGE_MIN_L + OUT_VOLTAGE_HYSTERESIS)            /**< max voltage for output undervoltage fault cancellation [V] */
 
 /* Input Voltage thresholds */
 #define IN_VOLTAGE_MAX_H               IN_VOLT_ADC_VALUE(425)                                   /**< max voltage for input overvoltage fault detection [V] */
 #define IN_VOLTAGE_HYSTERESIS          IN_VOLT_ADC_VALUE(12)                                    /**< hysteresis for input under/over voltage fault detection [V] */
 #define IN_VOLTAGE_MAX_L               (IN_VOLTAGE_MAX_H - IN_VOLTAGE_HYSTERESIS)               /**< min voltage for input overvoltage fault cancellation [V] */
-#define IN_VOLTAGE_MIN_L               IN_VOLT_ADC_VALUE(375)                                   /**< min voltage for input undervoltage fault detection [V] */
+#define IN_VOLTAGE_MIN_L               IN_VOLT_ADC_VALUE(380)                                   /**< min voltage for input undervoltage fault detection [V] */
 #define IN_VOLTAGE_MIN_H               (IN_VOLTAGE_MIN_L + IN_VOLTAGE_HYSTERESIS)               /**< max voltage for input undervoltage fault cancellation [V] */
 
 /* Burst mode on bus voltage thresholds */
-#define OUT_VOLTAGE_BURST_MODE_TH_H     OUT_VOLT_ADC_VALUE(52.8)   /**< max voltage for burst mode activation [V] */
-#define OUT_VOLTAGE_BURST_MODE_TH_L     OUT_VOLT_ADC_VALUE(48)   /**< min voltage for burst mode de-activation [V] */
+#define OUT_VOLTAGE_BURST_MODE_TH_H     OUT_VOLT_ADC_VALUE(63.8)   /**< max voltage for burst mode activation [V] */
+#define OUT_VOLTAGE_BURST_MODE_TH_L     OUT_VOLT_ADC_VALUE(58)   /**< min voltage for burst mode de-activation [V] */
 
 /* Temperature thresholds */
 #define TEMPERATURE_TH_H                ((uint16_t)55)                                          /**< max temperature for over-temperature fault detection (higher threshold) [°C] */
@@ -70,7 +70,7 @@
 #define TEMPERATURE_TH_L                (TEMPERATURE_TH_H - TEMPERATURE_HYSTERESIS)             /**< min temperature for over-temperature fault cancellation [°C] */
 
 /* Out current threshold */
-#define OUT_CURRENT_MAX                 HALL_IC_AMP2ADC_VALUE(62.5)                               /**< max output current for out over-current fault detection [A] */
+#define OUT_CURRENT_MAX                 HALL_IC_AMP2ADC_VALUE(51)                               /**< max output current for out over-current fault detection [A] */
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -445,30 +445,30 @@ void FLT_InputVoltageCheck(void){
   }
 
   /* Input undervoltage check */
-  if ((hVinVoltageFiltered < IN_VOLTAGE_MIN_L) || ((hVinVoltageFiltered < IN_VOLTAGE_MIN_H)&&(CheckSystemFaultAsserted(DCDC_IN_UNDER_VOLT_ERROR) == TRUE)))
-    {
-      FLT_SetSystemFault(DCDC_IN_UNDER_VOLT_ERROR);
-      /* Update LED blinking if last error is changed */
-      if((LED_LastFaultShown != DCDC_IN_UNDER_VOLT_ERROR) && (bFirstFaultDetected == FALSE)){
-        /* store last fault shown on LED */
-        LED_LastFaultShown = DCDC_IN_UNDER_VOLT_ERROR;
-        /* set fault LED Blinking */
-        LED_SetParams(&FaultLED, LED_BLINK_N, LED_DCDC_IN_UNDER_VOLTAGE_BLINK_NUM, LED_BLINK_PERIOD_VOLTAGE_ERROR, LED_BLINK_REPETITION_PERIOD_MS);
-      }
-      bFirstFaultDetected = TRUE;
-      if(STM_GetStateMachineStatus() != DSMPS_FAULT){
-        STM_SetStateMachineStatus(DSMPS_STOP);
-      }
-    }
-    else{
-      /* clear system fault */
-      FLT_ClearSystemFault(DCDC_IN_UNDER_VOLT_ERROR);
-      /* clear last fault shown if it is DCDC_IN_UNDER_VOLT_ERROR */
-      if(LED_LastFaultShown == DCDC_IN_UNDER_VOLT_ERROR)
-      {
-        LED_LastFaultShown = 0;
-      }
-    }
+  // if ((hVinVoltageFiltered < IN_VOLTAGE_MIN_L) || ((hVinVoltageFiltered < IN_VOLTAGE_MIN_H)&&(CheckSystemFaultAsserted(DCDC_IN_UNDER_VOLT_ERROR) == TRUE)))
+  //   {
+  //     FLT_SetSystemFault(DCDC_IN_UNDER_VOLT_ERROR);
+  //     /* Update LED blinking if last error is changed */
+  //     if((LED_LastFaultShown != DCDC_IN_UNDER_VOLT_ERROR) && (bFirstFaultDetected == FALSE)){
+  //       /* store last fault shown on LED */
+  //       LED_LastFaultShown = DCDC_IN_UNDER_VOLT_ERROR;
+  //       /* set fault LED Blinking */
+  //       LED_SetParams(&FaultLED, LED_BLINK_N, LED_DCDC_IN_UNDER_VOLTAGE_BLINK_NUM, LED_BLINK_PERIOD_VOLTAGE_ERROR, LED_BLINK_REPETITION_PERIOD_MS);
+  //     }
+  //     bFirstFaultDetected = TRUE;
+  //     if(STM_GetStateMachineStatus() != DSMPS_FAULT){
+  //       STM_SetStateMachineStatus(DSMPS_STOP);
+  //     }
+  //   }
+  //   else{
+  //     /* clear system fault */
+  //     FLT_ClearSystemFault(DCDC_IN_UNDER_VOLT_ERROR);
+  //     /* clear last fault shown if it is DCDC_IN_UNDER_VOLT_ERROR */
+  //     if(LED_LastFaultShown == DCDC_IN_UNDER_VOLT_ERROR)
+  //     {
+  //       LED_LastFaultShown = 0;
+  //     }
+  //   }
 }
 
 /**

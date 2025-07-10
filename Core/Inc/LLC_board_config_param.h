@@ -44,7 +44,7 @@
 
 /* out Voltage */
 //#define OUT_VOLT_CONV_RATIO             0.05882353 /* DC output voltage partitioning ratio : 10k/(10k+160k) */
-#define OUT_VOLT_CONV_RATIO             0.05729 /* DC output voltage partitioning ratio */
+#define OUT_VOLT_CONV_RATIO             0.04741 /* DC output voltage partitioning ratio */
 #define OUT_VOLT_ADC_VALUE(v)           ((uint16_t)((v * OUT_VOLT_CONV_RATIO * 4095)/3.3))
 #define OUT_VOLT_ADC_2_VOLT_VALUE(m)    ((float)((m * 3.3 /(OUT_VOLT_CONV_RATIO * 4095))))
 

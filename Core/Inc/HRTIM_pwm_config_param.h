@@ -60,10 +60,10 @@ presc   min     max
 */
 
 /* -- Dead time calculation ------------------------------------------------- */
-#define DEAD_TIME_RISING_NS     ((uint16_t)450) /**< initial or default dead time of rising edge in ns - see below for allowable range */
-#define DEAD_TIME_FALLING_NS    ((uint16_t)450) /**< initial or default dead time of falling edge in ns - see below for allowable range */
-#define DEAD_TIME_MAX_NS        ((uint16_t)961) /**< max dead time for both rising and falling edges in ns - see below for allowable range */
-#define DEAD_TIME_MIN_NS        ((uint16_t)385) /**< min dead time for both rising and falling edges in ns - see below for allowable range */
+#define DEAD_TIME_RISING_NS     ((uint16_t)950) /**< initial or default dead time of rising edge in ns - see below for allowable range */
+#define DEAD_TIME_FALLING_NS    ((uint16_t)950) /**< initial or default dead time of falling edge in ns - see below for allowable range */
+#define DEAD_TIME_MAX_NS        ((uint16_t)2132) /**< max dead time for both rising and falling edges in ns - see below for allowable range */
+#define DEAD_TIME_MIN_NS        ((uint16_t)853) /**< min dead time for both rising and falling edges in ns - see below for allowable range */
 
 // note: 550ns last dead time used for STW56N60DM2 for both rising and falling
 

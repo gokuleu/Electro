@@ -60,24 +60,24 @@
 #define START_UP_FAILED_ENABLED                 /**< if defined DCDC_STARTUP_FAILED_ERROR is set in START state if start-up time is elapsed without reaching reference voltage */
 
 /* Debug --------------------*/
-//#define OPEN_LOOP_MODE                /**< if defined SR delays and PWM frequency are initially set via debugger or communication (operation mode can be changed runtime)- OPEN LOOP operation, WARNING: output voltage MUST be clamped @48V */
+#define OPEN_LOOP_MODE                /**< if defined SR delays and PWM frequency are initially set via debugger or communication (operation mode can be changed runtime)- OPEN LOOP operation, WARNING: output voltage MUST be clamped @48V */
 #define DEBUG_COMP_OC_OUT             /**< if defined COMP_OC output is enabled */
 //#define DEBUG_COMP_SR_OUT             /**< if defined COMP_SR outputs are enabled */
 
 /* Additional driving -------*/
 #define SYNCH_RECTIFICATION             /**< if defined synchronous rectification is enabled to reduce conduction losses - PWMs depend on hSR_DelayRising1-2 and hSR_DelayFalling1-2 variables */
-#define ADAPTIVE_SYNCH_RECTIFICATION    /**< if defined synchronous rectification is enabled to reduce conduction losses - PWMs depend on COMP outputs and turn-off is adapted respect to VDS sensing - it must be define together with SYNCH_RECTIFICATION */
-#define AUTOMATIC_SR_TURN_ON_OFF        /**< if defined SR is automatically turned on and off depending on SR_IOUT_TURN_ON_THRESHOLD and SR_IOUT_TURN_OFF_THRESHOLD */
-#define FAN_PWM_DRIVING                 /**< if defined the FAN is driven by PWM, otherwise the FAN is driven as a GPIO */
+//#define ADAPTIVE_SYNCH_RECTIFICATION    /**< if defined synchronous rectification is enabled to reduce conduction losses - PWMs depend on COMP outputs and turn-off is adapted respect to VDS sensing - it must be define together with SYNCH_RECTIFICATION */
+//#define AUTOMATIC_SR_TURN_ON_OFF        /**< if defined SR is automatically turned on and off depending on SR_IOUT_TURN_ON_THRESHOLD and SR_IOUT_TURN_OFF_THRESHOLD */
+//#define FAN_PWM_DRIVING                 /**< if defined the FAN is driven by PWM, otherwise the FAN is driven as a GPIO */
 
 /* initial state of additional drivings and burst if defined */
 #define SYNCH_RECTIFICATION_INIT_ENABLED                /**< if defined synchronous rectification is initially enabled, the set can be changend runtime */
-#define ADAPTIVE_SYNCH_RECTIFICATION_INIT_ENABLED       /**< if defined adaptive synchronous rectification (with adaptive turn-off) is initially enabled, the set can be changend runtime */
+//#define ADAPTIVE_SYNCH_RECTIFICATION_INIT_ENABLED       /**< if defined adaptive synchronous rectification (with adaptive turn-off) is initially enabled, the set can be changend runtime */
 #define FAN_PWM_DRIVING_INIT_ENABLED                    /**< if defined fan PWM driving is initially enabled, the set can be changend runtime */
 #define LIGHT_LOAD_BURST_MODE_INIT_ENABLED              /**< if defined, together with LIGHT_LOAD_BURST_MODE, burst mode is set for low load condition */
 
 /* Additional features */
-#define OUT_CURRENT_SENSOR_CALIBRATION                  /**< if defined output current sensor offset is calibrated and both SR and BM threshold are computed considering the updated offset value */
+//#define OUT_CURRENT_SENSOR_CALIBRATION                  /**< if defined output current sensor offset is calibrated and both SR and BM threshold are computed considering the updated offset value */
 
 
 //#define AUTODELAYED_ADCy_INJECTED_TRIGGER
@@ -97,9 +97,9 @@
 
 /* -- Frequency Max, Min and Init values -- */
 #define HRTIM_MAX_PWM_FREQ_START_UP_HZ          346000     /**< maximum frequency in Hz of PWM signals at the beginning of start-up procedure */
-#define HRTIM_MIN_PWM_FREQ_START_UP_HZ          130000     /**< minimum frequency in Hz of PWM signals at the end of start-up procedure for closed loop operation if the control loop is not closed before */
+#define HRTIM_MIN_PWM_FREQ_START_UP_HZ          136000     /**< minimum frequency in Hz of PWM signals at the end of start-up procedure for closed loop operation if the control loop is not closed before */
 #define HRTIM_MAX_PWM_FREQ_HZ                   247000     /**< maximum frequency in Hz of PWM signals during closed loop regulation : at zero load with 240kHz -> Vout = 48.3 */
-#define HRTIM_MIN_PWM_FREQ_HZ                   130000     /**< minimum frequency in Hz of PWM signals during closed loop regulation - WARNING: if f_min < 140626 Hz, extended PID must be used because period_max > S16_MAX */
+#define HRTIM_MIN_PWM_FREQ_HZ                   136000     /**< minimum frequency in Hz of PWM signals during closed loop regulation - WARNING: if f_min < 140626 Hz, extended PID must be used because period_max > S16_MAX */
 #define HRTIM_REP_RATE                          0          /**< Repetition rate of HRTIM */
 
 #ifdef FREQUENCY_RAMP_UP
@@ -116,10 +116,10 @@
 
 /*-- MAX values --------------------------------------------------------------*/
 /* -- Synchronous Rectification max values -- */
-#define SYNCH_RECT_DELAY_RISING1_MAX_NS     ((int16_t)600)      /**< max delay in ns between FB PWM and SR1 PWM rising edges in ns - only for an adaptive SR */
-#define SYNCH_RECT_DELAY_FALLING1_MAX_NS    ((int16_t)600)      /**< max delay in ns between FB PWM and SR1 PWM rising edges in ns - only for an adaptive SR */
-#define SYNCH_RECT_DELAY_RISING2_MAX_NS     ((int16_t)600)      /**< max delay in ns between FB PWM and SR2 PWM rising edges in ns - only for an adaptive SR */
-#define SYNCH_RECT_DELAY_FALLING2_MAX_NS    ((int16_t)600)      /**< max delay in ns between FB PWM and SR2 PWM rising edges in ns - only for an adaptive SR */
+#define SYNCH_RECT_DELAY_RISING1_MAX_NS     ((int16_t)400)      /**< max delay in ns between FB PWM and SR1 PWM rising edges in ns - only for an adaptive SR */
+#define SYNCH_RECT_DELAY_FALLING1_MAX_NS    ((int16_t)400)      /**< max delay in ns between FB PWM and SR1 PWM rising edges in ns - only for an adaptive SR */
+#define SYNCH_RECT_DELAY_RISING2_MAX_NS     ((int16_t)400)      /**< max delay in ns between FB PWM and SR2 PWM rising edges in ns - only for an adaptive SR */
+#define SYNCH_RECT_DELAY_FALLING2_MAX_NS    ((int16_t)400)      /**< max delay in ns between FB PWM and SR2 PWM rising edges in ns - only for an adaptive SR */
 
 /* -- Synchronous Rectification init values -- */
 #define SYNCH_RECT_DELAY_RISING1_INIT_NS     ((int16_t)(250))   /**< init rising delay for SR1 in ns */
@@ -145,7 +145,7 @@
 #define ADAPTIVE_SYNCH_RECT_INCREMENTAL_VDS2_TH2_mV     ((uint16_t)1200)         /**< ADC Vds2 threshold2 in mV to increase falling delay in adaptive SR */
 
 /*-- Blanking window duration for COMP turn-off in adaptive SR ---------------*/
-#define SYNCH_RECT_TURN_OFF_BLANKING_WINDOW_NS  ((int16_t)700)                  /**< minimum turn-on time for SR1/SR2 signals for adaptive SR in ns */
+#define SYNCH_RECT_TURN_OFF_BLANKING_WINDOW_NS  ((int16_t)580)                  /**< minimum turn-on time for SR1/SR2 signals for adaptive SR in ns */
 
 /*-- Turn-off COMP thresholds for adaptive SR --------------------------------*/
 #define DAC_SR1_TURN_OFF_COMP_THRESHOLD_mV      ((uint16_t) 900)                /**< COMP Vds1 threshold in mV on DAC to shut-down PWM in adaptive SR */
@@ -158,7 +158,7 @@
 #define SR_IOUT_TURN_OFF_THRESHOLD      HALL_IC_AMP2ADC_VALUE(SR_IOUT_TURN_OFF_THRESHOLD_A)     /**< Automatic SR Iout turn-off threshold if AUTOMATIC_SR_TURN_ON_OFF is defined */
 
 /*-- Turn-off COMP thresholds for Over Current Protection --------------------*/
-#define DAC_OVERCURRENT_COMP_THRESHOLD          ((uint16_t) 3273)  /**< COMP_OC threshold in range [0;4095] on DAC to shut-down PWMs */
+#define DAC_OVERCURRENT_COMP_THRESHOLD          ((uint16_t) 3212)  /**< COMP_OC threshold in range [0;4095] on DAC to shut-down PWMs */
 
 /*-- ADC trigger point -------------------------------------------------------*/
 #define ADCx_REGULAR_TRIGGER_POINT_NS   ((uint16_t)(550 + DEAD_TIME_RISING_NS)) /**< ADCx regular acquisition trigger point in ns respect to the beginning of HRTIM period (rollover event) */
@@ -190,8 +190,8 @@
 #define FAN_PWM_DUTY_HIGH_SPEED         ((uint16_t)((97*FAN_PWM_TIM_PERIOD)/100))       /**< high speed duty cycle for fan control */
 #define FAN_TEMPERATURE_THRESHOLD_H     43                                              /**< temperature high threshold (for hysteresis): if temperature is above the threshold, the fan is driven at high speed, otherwise the speed depends on phase shift value (if FAN_PWM_DRIVING is defined) */
 #define FAN_TEMPERATURE_THRESHOLD_L     38                                              /**< temperature low threshold (for hysteresis): if temperature is above the threshold, the fan is driven at high speed, otherwise the speed depends on phase shift value (if FAN_PWM_DRIVING is defined) */
-#define FAN_HIGH_LOAD_THRESHOLD         HALL_IC_AMP2ADC_VALUE(40.6)                       /**< output current threshold to activate max duty cycle for fan */
-#define FAN_LOW_LOAD_THRESHOLD          HALL_IC_AMP2ADC_VALUE(6.3)                        /**< output current threshold to activate min duty cycle for fan */
+#define FAN_HIGH_LOAD_THRESHOLD         HALL_IC_AMP2ADC_VALUE(33.2)                       /**< output current threshold to activate max duty cycle for fan */
+#define FAN_LOW_LOAD_THRESHOLD          HALL_IC_AMP2ADC_VALUE(5.1)                        /**< output current threshold to activate min duty cycle for fan */
 
 
 
@@ -237,7 +237,7 @@
 
 /** Voltage regulation value **/
 #define STARTUP_FINAL_OUT_VOLTAGE               NOMINAL_OUT_VOLTAGE             /**< reference value in Volts for output voltage at end of start-up */
-#define NOMINAL_OUT_VOLTAGE                     OUT_VOLT_ADC_VALUE(48)          /**< reference value in Volts for output voltage */
+#define NOMINAL_OUT_VOLTAGE                     OUT_VOLT_ADC_VALUE(58)          /**< reference value in Volts for output voltage */
 
 /*----------  Converted values for HRTIM: do not modify ----------------------*/
 
