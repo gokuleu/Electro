@@ -1,0 +1,7 @@
+parser.y:332:6:yyerror	0	static
+parser.y:337:5:yywrap	0	static
+parser.y:342:6:CheckOutOfRangeParam	0	static
+parser.y:353:6:updateConfigParam	0	static
+parser.y:363:6:updateMeasureValues	16	static
+parser.y:394:6:updateLastFaultOccurred	8	static
+y.tab.c:1214:1:yyparse	1272	static

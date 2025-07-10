@@ -1,0 +1,5 @@
+../Core/Src/DPS_Communication.c:102:10:ReceivePrimaryStatus	2
+../Core/Src/DPS_Communication.c:130:6:SendPrimaryStatus	1
+../Core/Src/DPS_Communication.c:145:6:SendAck	1
+../Core/Src/DPS_Communication.c:155:6:SendDebugMessage	1
+../Core/Src/DPS_Communication.c:178:6:USART_Task	2

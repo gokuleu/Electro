@@ -60,8 +60,8 @@ all: main-build
 main-build: Electro_Bringup_Code.elf secondary-outputs
 
 # Tool invocations
-Electro_Bringup_Code.elf Electro_Bringup_Code.map: $(OBJS) $(USER_OBJS) D:\proj\Electro_Bringup_Code\Electro_Bringup_Code\STM32F334R8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Electro_Bringup_Code.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\proj\Electro_Bringup_Code\Electro_Bringup_Code\STM32F334R8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Electro_Bringup_Code.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Electro_Bringup_Code.elf Electro_Bringup_Code.map: $(OBJS) $(USER_OBJS) D:\proj\Electro_Bringup_Code\iar_copy\STM32F334R8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Electro_Bringup_Code.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\proj\Electro_Bringup_Code\iar_copy\STM32F334R8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Electro_Bringup_Code.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

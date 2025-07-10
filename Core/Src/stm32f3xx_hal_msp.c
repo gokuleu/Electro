@@ -1,528 +1,730 @@
-
-/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file         stm32f3xx_hal_msp.c
-  * @brief        This file provides code for the MSP Initialization
-  *               and de-Initialization codes.
+  * @file    stm32f3xx_hal_msp.c
+  * @author  MCD Application Team
+  * @version V1.0.0
+  * @date    24-May-2017
+  * @brief   HAL MSP module.
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
+  * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
   *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
+  * Redistribution and use in source and binary forms, with or without modification,
+  * are permitted provided that the following conditions are met:
+  *   1. Redistributions of source code must retain the above copyright notice,
+  *      this list of conditions and the following disclaimer.
+  *   2. Redistributions in binary form must reproduce the above copyright notice,
+  *      this list of conditions and the following disclaimer in the documentation
+  *      and/or other materials provided with the distribution.
+  *   3. Neither the name of STMicroelectronics nor the names of its contributors
+  *      may be used to endorse or promote products derived from this software
+  *      without specific prior written permission.
   *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
+  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  *
+  ******************************************************************************  
+  */ 
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
-/* USER CODE BEGIN Includes */
+#include "stm32f3xx_hal.h"
+#include "LLC_board_config_param.h"
+#include "LLC_control_param.h"
+#include "UI_UART_Interface.h"
 
-/* USER CODE END Includes */
-extern DMA_HandleTypeDef hdma_adc1;
-
-extern DMA_HandleTypeDef hdma_adc2;
+/** @addtogroup DSMPS_project
+  * @{
+  */
 
 /* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN TD */
-
-/* USER CODE END TD */
-
 /* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN Define */
-
-/* USER CODE END Define */
-
 /* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN Macro */
-
-/* USER CODE END Macro */
-
 /* Private variables ---------------------------------------------------------*/
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
 /* Private function prototypes -----------------------------------------------*/
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
-
-/* External functions --------------------------------------------------------*/
-/* USER CODE BEGIN ExternalFunctions */
-
-/* USER CODE END ExternalFunctions */
-
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-void HAL_HRTIM_MspPostInit(HRTIM_HandleTypeDef *hhrtim);
-
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-                    /**
-  * Initializes the Global MSP.
-  */
-void HAL_MspInit(void)
-{
-
-  /* USER CODE BEGIN MspInit 0 */
-
-  /* USER CODE END MspInit 0 */
-
-  __HAL_RCC_SYSCFG_CLK_ENABLE();
-  __HAL_RCC_PWR_CLK_ENABLE();
-
-  /* System interrupt init*/
-
-  /* USER CODE BEGIN MspInit 1 */
-
-  /* USER CODE END MspInit 1 */
-}
-
-static uint32_t HAL_RCC_ADC12_CLK_ENABLED=0;
+/* Private functions ---------------------------------------------------------*/
 
 /**
-* @brief ADC MSP Initialization
-* This function configures the hardware resources used in this example
-* @param hadc: ADC handle pointer
-* @retval None
-*/
-void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
+  */
+static void Error_Handler(void)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(hadc->Instance==ADC1)
-  {
-  /* USER CODE BEGIN ADC1_MspInit 0 */
-
-  /* USER CODE END ADC1_MspInit 0 */
-    /* Peripheral clock enable */
-    HAL_RCC_ADC12_CLK_ENABLED++;
-    if(HAL_RCC_ADC12_CLK_ENABLED==1){
-      __HAL_RCC_ADC12_CLK_ENABLE();
+  /* blocking function */
+    while(1)
+    {
     }
+}
 
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**ADC1 GPIO Configuration
-    PC0     ------> ADC1_IN6
-    PC1     ------> ADC1_IN7
-    PC2     ------> ADC1_IN8
-    PA0     ------> ADC1_IN1
-    PA1     ------> ADC1_IN2
-    PA2     ------> ADC1_IN3
-    PA3     ------> ADC1_IN4
-    */
-    GPIO_InitStruct.Pin = EXT_TEMP_adc_input_Pin|DC_Vout_Trmnl_adc_input_Pin|AC_VSNS_adc_input_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+/** @defgroup HAL_MSP_Private_Functions
+  * @{
+  */
+/**
+  * @brief ADC MSP Initialization
+  *        This function configures the hardware resources used in this example:
+  *           - Peripheral's clock enable
+  *           - Peripheral's GPIO Configuration
+  * @param hadc: ADC handle pointer
+  * @retval None
+  */
+void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
+{
+  GPIO_InitTypeDef          GPIO_InitStruct;
+  static DMA_HandleTypeDef  hdma_adc1;
+  static DMA_HandleTypeDef  hdma_adc2;
+  
+  /*##-1- Enable peripherals and GPIO Clocks #################################*/
+  /* Enable GPIO clock */
+  ADCx_CHANNEL_GPIO_CLK_ENABLE();
+  /* ADCx Periph clock enable */
+  ADCx_CLK_ENABLE();
+  /* Enable DMA clock */
+  DMAx_CLK_ENABLE();
+  
+  /* Enable GPIO clock */
+  ADCy_CHANNEL_GPIO_CLK_ENABLE();
+  /* ADC1 Periph clock enable */
+  ADCy_CLK_ENABLE();
+  
+#ifdef DSMPS_CONTROL_BOARD  // also port C is used
+  __GPIOC_CLK_ENABLE();
+#endif
+  
+  /*##-2- Configure peripheral GPIO ##########################################*/
+  /* ADC Channel GPIO pin configuration - Vout */
+  GPIO_InitStruct.Pin = ADCx_VOUT_CHANNEL_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ADCx_VOUT_CHANNEL_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* ADC Channel GPIO pin configuration - Vbus */
+  GPIO_InitStruct.Pin = ADCx_VBUS_CHANNEL_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ADCx_VBUS_CHANNEL_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* ADC Channel GPIO pin configuration - Iout */
+  GPIO_InitStruct.Pin = ADCx_IOUT_CHANNEL_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ADCx_IOUT_CHANNEL_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* ADC Channel GPIO pin configuration - Ires */
+  GPIO_InitStruct.Pin = ADCy_IRES_CHANNEL_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ADCy_IRES_CHANNEL_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* ADC Channel GPIO pin configuration - IresAvg */
+  GPIO_InitStruct.Pin = ADCy_IRES_AVG_CHANNEL_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ADCy_IRES_AVG_CHANNEL_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* ADC Channel GPIO pin configuration - Temperature */
+  GPIO_InitStruct.Pin = ADCy_TEMP_CHANNEL_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ADCy_TEMP_CHANNEL_GPIO_PORT, &GPIO_InitStruct);
+  
+#ifdef ADAPTIVE_SYNCH_RECTIFICATION
+  /* ADC Channel GPIO pin configuration - Vds_SR1*/
+  GPIO_InitStruct.Pin = ADCx_VDS1_CHANNEL;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ADCx_VDS1_CHANNEL_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* ADC Channel GPIO pin configuration - Vds_SR2*/
+  GPIO_InitStruct.Pin = ADCy_VDS2_CHANNEL;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ADCy_VDS2_CHANNEL_GPIO_PORT, &GPIO_InitStruct); 
+#endif         
 
-    GPIO_InitStruct.Pin = DC_Vout_Monitor_adc_input_Pin|DC_Output_Current_adc_input_Pin|DC_Bus_Monitor_adc_input_Pin|V_DS_SR1_adc_input_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-    /* ADC1 DMA Init */
-    /* ADC1 Init */
-    hdma_adc1.Instance = DMA1_Channel1;
+  /*##-3- Configure DMA #################################################*/
+  if(hadc->Instance == ADCx)
+  {
+    hdma_adc1.Instance = ADCx_DMA_CHANNEL; 
     hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
+//    hdma_adc1.Init.MemInc = DMA_MINC_DISABLE; // 1 conversion
+    hdma_adc1.Init.MemInc = DMA_MINC_ENABLE; // 3 conversions
     hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
     hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
     hdma_adc1.Init.Mode = DMA_CIRCULAR;
-    hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
+    hdma_adc1.Init.Priority = DMA_PRIORITY_VERY_HIGH;
+
+    /*##-4- Select Callbacks functions called after Transfer complete and Transfer error */
+//    hdma_adc1.XferCpltCallback  = TransferComplete;
+//    DmaHandle.XferErrorCallback = TransferError;
+
     if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
     {
+      /* ADC initialization Error */
       Error_Handler();
-    }
-
-    __HAL_LINKDMA(hadc,DMA_Handle,hdma_adc1);
-
-  /* USER CODE BEGIN ADC1_MspInit 1 */
-
-  /* USER CODE END ADC1_MspInit 1 */
+    } 
+    
+    /* Associate the initialized DMA handle to the the ADC handle */
+    __HAL_LINKDMA(hadc, DMA_Handle, hdma_adc1);
+    
+      /* NVIC configuration for DMA transfer complete interrupt - if needed */
+//      HAL_NVIC_SetPriority(ADCx_DMA_IRQn, 0, 0);   
+//      HAL_NVIC_EnableIRQ(ADCx_DMA_IRQn);
+    
+#ifdef VOUT_ANALOG_WATCHDOG_ENABLED
+          /* ADC Irq - to verify trigger point with EOS convertion Irq */
+      HAL_NVIC_SetPriority(ADC1_2_IRQn, 0, 0);   
+      HAL_NVIC_EnableIRQ(ADC1_2_IRQn);
+      /* Enable AWD1 Irq */
+      __HAL_ADC_ENABLE_IT(hadc, ADC_IT_AWD1);
+      /* Enable EOS Irq */
+//      __HAL_ADC_ENABLE_IT(hadc, ADC_IT_JEOC);
+#endif
+      /* ADC Irq - to verify trigger point with EOS convertion Irq */
+//      HAL_NVIC_SetPriority(ADC1_2_IRQn, 0, 0);   
+//      HAL_NVIC_EnableIRQ(ADC1_2_IRQn);
+      /* Enable EOS Irq */
+//      __HAL_ADC_ENABLE_IT(hadc, ADC_IT_EOS);
+      /* Enable EOS Irq */
+//      __HAL_ADC_ENABLE_IT(hadc, ADC_IT_JEOC);
+      
+      
   }
-  else if(hadc->Instance==ADC2)
-  {
-  /* USER CODE BEGIN ADC2_MspInit 0 */
-
-  /* USER CODE END ADC2_MspInit 0 */
-    /* Peripheral clock enable */
-    HAL_RCC_ADC12_CLK_ENABLED++;
-    if(HAL_RCC_ADC12_CLK_ENABLED==1){
-      __HAL_RCC_ADC12_CLK_ENABLE();
-    }
-
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**ADC2 GPIO Configuration
-    PA4     ------> ADC2_IN1
-    PA5     ------> ADC2_IN2
-    */
-    GPIO_InitStruct.Pin = VDS_SR2_sensing_adc_input_Pin|GPIO_PIN_5;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-    /* ADC2 DMA Init */
-    /* ADC2 Init */
-    hdma_adc2.Instance = DMA1_Channel2;
-    hdma_adc2.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma_adc2.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_adc2.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_adc2.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    hdma_adc2.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-    hdma_adc2.Init.Mode = DMA_CIRCULAR;
-    hdma_adc2.Init.Priority = DMA_PRIORITY_LOW;
-    if (HAL_DMA_Init(&hdma_adc2) != HAL_OK)
+/****************************************************************/
+  
+  else if (hadc->Instance == ADCy){
     {
-      Error_Handler();
+//      __HAL_DMA_REMAP_CHANNEL_ENABLE(ADCy_DMA_REMAP_CH); // comment if remap is not needed - see RM pag 180
+        
+      hdma_adc2.Instance = ADCy_DMA_CHANNEL; 
+      hdma_adc2.Init.Direction = DMA_PERIPH_TO_MEMORY;
+      hdma_adc2.Init.PeriphInc = DMA_PINC_DISABLE;
+//      hdma_adc2.Init.MemInc = DMA_MINC_DISABLE; // 1 conversion
+      hdma_adc2.Init.MemInc = DMA_MINC_ENABLE; // 3 conversions
+      hdma_adc2.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+      hdma_adc2.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+      hdma_adc2.Init.Mode = DMA_CIRCULAR;
+      hdma_adc2.Init.Priority = DMA_PRIORITY_VERY_HIGH;
+
+      /*##-4- Select Callbacks functions called after Transfer complete and Transfer error */
+//      hdma_adc2.XferCpltCallback  = TransferComplete;
+//      DmaHandle.XferErrorCallback = TransferError;
+
+      if (HAL_DMA_Init(&hdma_adc2) != HAL_OK)
+      {
+        /* ADC initialization Error */
+        Error_Handler();
+      } 
+      
+      /* Associate the initialized DMA handle to the the ADC handle */
+      __HAL_LINKDMA(hadc, DMA_Handle, hdma_adc2);
+  
+//      /* NVIC configuration for DMA transfer complete interrupt - if needed */
+//      HAL_NVIC_SetPriority(ADCy_DMA_IRQn, 2, 0);   
+//      HAL_NVIC_EnableIRQ(ADCy_DMA_IRQn);
     }
-
-    __HAL_LINKDMA(hadc,DMA_Handle,hdma_adc2);
-
-  /* USER CODE BEGIN ADC2_MspInit 1 */
-
-  /* USER CODE END ADC2_MspInit 1 */
   }
-
+  
 }
 
 /**
-* @brief ADC MSP De-Initialization
-* This function freeze the hardware resources used in this example
-* @param hadc: ADC handle pointer
-* @retval None
-*/
-void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
+  * @brief ADC MSP De-Initialization 
+  *        This function frees the hardware resources used in this example:
+  *          - Disable the Peripheral's clock
+  *          - Revert GPIO to their default state
+  * @param hadc: ADC handle pointer
+  * @retval None
+  */
+void HAL_ADC_MspDeInit(ADC_HandleTypeDef *hadc)
 {
-  if(hadc->Instance==ADC1)
-  {
-  /* USER CODE BEGIN ADC1_MspDeInit 0 */
+  static DMA_HandleTypeDef  hdma_adc;
+  
+  /*##-1- Reset peripherals ##################################################*/
+  ADCx_FORCE_RESET();
+  ADCx_RELEASE_RESET();
 
-  /* USER CODE END ADC1_MspDeInit 0 */
-    /* Peripheral clock disable */
-    HAL_RCC_ADC12_CLK_ENABLED--;
-    if(HAL_RCC_ADC12_CLK_ENABLED==0){
-      __HAL_RCC_ADC12_CLK_DISABLE();
-    }
-
-    /**ADC1 GPIO Configuration
-    PC0     ------> ADC1_IN6
-    PC1     ------> ADC1_IN7
-    PC2     ------> ADC1_IN8
-    PA0     ------> ADC1_IN1
-    PA1     ------> ADC1_IN2
-    PA2     ------> ADC1_IN3
-    PA3     ------> ADC1_IN4
-    */
-    HAL_GPIO_DeInit(GPIOC, EXT_TEMP_adc_input_Pin|DC_Vout_Trmnl_adc_input_Pin|AC_VSNS_adc_input_Pin);
-
-    HAL_GPIO_DeInit(GPIOA, DC_Vout_Monitor_adc_input_Pin|DC_Output_Current_adc_input_Pin|DC_Bus_Monitor_adc_input_Pin|V_DS_SR1_adc_input_Pin);
-
-    /* ADC1 DMA DeInit */
-    HAL_DMA_DeInit(hadc->DMA_Handle);
-  /* USER CODE BEGIN ADC1_MspDeInit 1 */
-
-  /* USER CODE END ADC1_MspDeInit 1 */
-  }
-  else if(hadc->Instance==ADC2)
-  {
-  /* USER CODE BEGIN ADC2_MspDeInit 0 */
-
-  /* USER CODE END ADC2_MspDeInit 0 */
-    /* Peripheral clock disable */
-    HAL_RCC_ADC12_CLK_ENABLED--;
-    if(HAL_RCC_ADC12_CLK_ENABLED==0){
-      __HAL_RCC_ADC12_CLK_DISABLE();
-    }
-
-    /**ADC2 GPIO Configuration
-    PA4     ------> ADC2_IN1
-    PA5     ------> ADC2_IN2
-    */
-    HAL_GPIO_DeInit(GPIOA, VDS_SR2_sensing_adc_input_Pin|GPIO_PIN_5);
-
-    /* ADC2 DMA DeInit */
-    HAL_DMA_DeInit(hadc->DMA_Handle);
-  /* USER CODE BEGIN ADC2_MspDeInit 1 */
-
-  /* USER CODE END ADC2_MspDeInit 1 */
-  }
-
+  /*##-2- Disable peripherals and GPIO Clocks ################################*/
+  /* De-initialize the ADCx GPIO pin */
+  HAL_GPIO_DeInit(ADCx_VOUT_CHANNEL_GPIO_PORT, ADCx_VOUT_CHANNEL_PIN);
+  /* De-initialize the ADCy GPIO pin */
+  HAL_GPIO_DeInit(ADCy_TEMP_CHANNEL_GPIO_PORT, ADCy_TEMP_CHANNEL_PIN);
+  
+  /*##-3- Disable the DMA Streams ############################################*/
+  /* De-Initialize the DMA Stream associate to transmission process */
+  HAL_DMA_DeInit(&hdma_adc); 
+    
+  /*##-4- Disable the NVIC for DMA ###########################################*/
+//  HAL_NVIC_DisableIRQ(ADCx_DMA_IRQn);
 }
 
+
 /**
-* @brief CAN MSP Initialization
-* This function configures the hardware resources used in this example
-* @param hcan: CAN handle pointer
+* @brief  HAL_HRTIM_MspInit
+* @param  None
 * @retval None
 */
-void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
+void HAL_HRTIM_MspInit(HRTIM_HandleTypeDef * hhrtim)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(hcan->Instance==CAN)
-  {
-  /* USER CODE BEGIN CAN_MspInit 0 */
+  static GPIO_InitTypeDef GPIO_InitStruct;
+  
+  /*##-1- Enable peripherals and GPIO Clocks #################################*/
+  __GPIOA_CLK_ENABLE();
+  __GPIOB_CLK_ENABLE();
 
-  /* USER CODE END CAN_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_CAN1_CLK_ENABLE();
+  /*##-2- Configure peripheral GPIO ##########################################*/  
+  
+  /* Configure HRTIM outputs */  
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;;  
+  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;;  
+  GPIO_InitStruct.Alternate = GPIO_AF13_HRTIM1;
+  
+  /* Configure HRTIM output: PWM_FB_HS1 */
+  GPIO_InitStruct.Pin = PWM_FB_HS1_GPIO_PIN;  
+  HAL_GPIO_Init(PWM_FB_HS1_GPIO_PORT, &GPIO_InitStruct);
 
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**CAN GPIO Configuration
-    PB8     ------> CAN_RX
-    PB9     ------> CAN_TX
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_8;
+  /* Configure HRTIM output: PWM_FB_LS1 */
+  GPIO_InitStruct.Pin = PWM_FB_LS1_GPIO_PIN;
+  HAL_GPIO_Init(PWM_FB_LS1_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* Configure HRTIM output: PWM_FB_HS2 */
+  GPIO_InitStruct.Pin = PWM_FB_HS2_GPIO_PIN;
+  HAL_GPIO_Init(PWM_FB_HS2_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* Configure HRTIM output: PWM_FB_LS2 */
+  GPIO_InitStruct.Pin = PWM_FB_LS2_GPIO_PIN;
+  HAL_GPIO_Init(PWM_FB_LS2_GPIO_PORT, &GPIO_InitStruct);
+  
+#ifdef SYNCH_RECTIFICATION
+  /* Configure HRTIM output: PWM_SR_HS1 */
+  GPIO_InitStruct.Pin = PWM_SR_HS1_GPIO_PIN;
+  HAL_GPIO_Init(PWM_SR_HS1_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* Configure HRTIM output: PWM_SR_LS1 */
+  GPIO_InitStruct.Pin = PWM_SR_LS1_GPIO_PIN;
+  HAL_GPIO_Init(PWM_SR_LS1_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* Configure HRTIM output: PWM_SR_HS2 */
+  GPIO_InitStruct.Pin = PWM_SR_HS2_GPIO_PIN;
+  HAL_GPIO_Init(PWM_SR_HS2_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* Configure HRTIM output: PWM_SR_LS2 */
+  GPIO_InitStruct.Pin = PWM_SR_LS2_GPIO_PIN;
+  HAL_GPIO_Init(PWM_SR_LS2_GPIO_PORT, &GPIO_InitStruct);
+#endif
+  
+#ifdef OVERCURRENT_PROTECTION
+  /* Configure HRTIM output: SCOUT - Not used */
+//  GPIO_InitStruct.Alternate = GPIO_AF12_HRTIM1;
+//  GPIO_InitStruct.Pin = HRTIM_SCOUT_GPIO_PIN;
+//  HAL_GPIO_Init(HRTIM_SCOUT_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* Configure Global Fault interrupt channel in NVIC */
+  HAL_NVIC_SetPriority(HRTIM1_FLT_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(HRTIM1_FLT_IRQn);
+#endif
+  /*##-3- Configure the NVIC #################################################*/
+  /* Configure and enable HRTIM TIMERC interrupt channel in NVIC */
+//  HAL_NVIC_SetPriority(HRTIM1_TIMC_IRQn, 0, 1);
+//  HAL_NVIC_EnableIRQ(HRTIM1_TIMC_IRQn);
+//  __HAL_HRTIM_TIMER_ENABLE_IT(hhrtim, HRTIM_TIMERINDEX_TIMER_C, HRTIM_TIM_IT_CMP4);
+   
+  /* Configure and enable HRTIM Master interrupt channel in NVIC */
+//  HAL_NVIC_SetPriority(HRTIM1_Master_IRQn, 0, 1);
+//  HAL_NVIC_EnableIRQ(HRTIM1_Master_IRQn);
+}
+
+
+/**
+  * @brief COMP MSP Initialization 
+  *        This function configures the hardware resources used in this example: 
+  *           - Peripheral's clock enable
+  *           - Peripheral's GPIO Configuration  
+  *           - NVIC configuration for COMP interrupt request enable
+  * @param hcomp: COMP handle pointer
+  * @retval None
+  */
+void HAL_COMP_MspInit(COMP_HandleTypeDef* hcomp)
+{
+  GPIO_InitTypeDef      GPIO_InitStruct;
+  
+#ifdef OVERCURRENT_PROTECTION 
+  /*##-1- Enable peripherals and GPIO Clocks #################################*/
+  /* Enable GPIO clock ****************************************/
+  COMP_OC_GPIO_CLK_ENABLE();
+  /* COMP Periph clock enable */
+  COMP_OC_CLK_ENABLE();
+  
+  /*##-2- Configure peripheral GPIO ##########################################*/  
+  /* COMP GPIO pin configuration */
+  GPIO_InitStruct.Pin = COMP_OC_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;  
+  HAL_GPIO_Init(COMP_OC_GPIO_PORT, &GPIO_InitStruct);
+  
+  #ifdef DEBUG_COMP_OC_OUT
+    /* Debug COMP2 Out */
+    GPIO_InitStruct.Pin = COMP_OC_OUT_GPIO_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF9_CAN;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = GPIO_PIN_9;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Alternate = COMP_OC_OUT_AF;
+    HAL_GPIO_Init(COMP_OC_OUT_GPIO_PORT, &GPIO_InitStruct);
+  #endif
+#endif
+  
+#ifdef ADAPTIVE_SYNCH_RECTIFICATION 
+  /*##-1- Enable peripherals and GPIO Clocks #################################*/
+  /* Enable GPIO clock ****************************************/
+  COMP_VDS_SR1_GPIO_CLK_ENABLE();
+  /* COMP Periph clock enable */
+  COMP_VDS_SR1_CLK_ENABLE();
+  COMP_VDS_SR2_CLK_ENABLE();
+  
+  /*##-2- Configure peripheral GPIO ##########################################*/  
+  /* COMP_VDS_SR1 GPIO pin configuration */
+  GPIO_InitStruct.Pin = COMP_VDS_SR1_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;  
+  HAL_GPIO_Init(COMP_VDS_SR1_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* COMP_VDS_SR2 GPIO pin configuration */
+  GPIO_InitStruct.Pin = COMP_VDS_SR2_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;  
+  HAL_GPIO_Init(COMP_VDS_SR2_GPIO_PORT, &GPIO_InitStruct);
+  
+  // set config for channel 2
+  
+  #ifdef DEBUG_COMP_SR_OUT
+    /* Debug COMP_VDS_SR1 Out */
+    GPIO_InitStruct.Pin = COMP_VDS_SR1_OUT_GPIO_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF9_CAN;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    /* CAN interrupt Init */
-    HAL_NVIC_SetPriority(CAN_TX_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(CAN_TX_IRQn);
-    HAL_NVIC_SetPriority(CAN_RX0_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(CAN_RX0_IRQn);
-    HAL_NVIC_SetPriority(CAN_RX1_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(CAN_RX1_IRQn);
-    HAL_NVIC_SetPriority(CAN_SCE_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(CAN_SCE_IRQn);
-  /* USER CODE BEGIN CAN_MspInit 1 */
-
-  /* USER CODE END CAN_MspInit 1 */
-
-  }
-
-}
-
-/**
-* @brief CAN MSP De-Initialization
-* This function freeze the hardware resources used in this example
-* @param hcan: CAN handle pointer
-* @retval None
-*/
-void HAL_CAN_MspDeInit(CAN_HandleTypeDef* hcan)
-{
-  if(hcan->Instance==CAN)
-  {
-  /* USER CODE BEGIN CAN_MspDeInit 0 */
-
-  /* USER CODE END CAN_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_CAN1_CLK_DISABLE();
-
-    /**CAN GPIO Configuration
-    PB8     ------> CAN_RX
-    PB9     ------> CAN_TX
-    */
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_8|GPIO_PIN_9);
-
-    /* CAN interrupt DeInit */
-    HAL_NVIC_DisableIRQ(CAN_TX_IRQn);
-    HAL_NVIC_DisableIRQ(CAN_RX0_IRQn);
-    HAL_NVIC_DisableIRQ(CAN_RX1_IRQn);
-    HAL_NVIC_DisableIRQ(CAN_SCE_IRQn);
-  /* USER CODE BEGIN CAN_MspDeInit 1 */
-
-  /* USER CODE END CAN_MspDeInit 1 */
-  }
-
-}
-
-/**
-* @brief HRTIM MSP Initialization
-* This function configures the hardware resources used in this example
-* @param hhrtim: HRTIM handle pointer
-* @retval None
-*/
-void HAL_HRTIM_MspInit(HRTIM_HandleTypeDef* hhrtim)
-{
-  if(hhrtim->Instance==HRTIM1)
-  {
-  /* USER CODE BEGIN HRTIM1_MspInit 0 */
-
-  /* USER CODE END HRTIM1_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_HRTIM1_CLK_ENABLE();
-  /* USER CODE BEGIN HRTIM1_MspInit 1 */
-
-  /* USER CODE END HRTIM1_MspInit 1 */
-
-  }
-
-}
-
-void HAL_HRTIM_MspPostInit(HRTIM_HandleTypeDef* hhrtim)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(hhrtim->Instance==HRTIM1)
-  {
-  /* USER CODE BEGIN HRTIM1_MspPostInit 0 */
-
-  /* USER CODE END HRTIM1_MspPostInit 0 */
-
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**HRTIM1 GPIO Configuration
-    PB12     ------> HRTIM1_CHC1
-    PB13     ------> HRTIM1_CHC2
-    PB14     ------> HRTIM1_CHD1
-    PB15     ------> HRTIM1_CHD2
-    PA8     ------> HRTIM1_CHA1
-    PA9     ------> HRTIM1_CHA2
-    PA10     ------> HRTIM1_CHB1
-    PA11     ------> HRTIM1_CHB2
-    */
-    GPIO_InitStruct.Pin = PWM_SR_HS2_Pin|PWM_SR_LS1_Pin|PWM_SR_HS1_Pin|PWM_SR_LS2_Pin;
+    GPIO_InitStruct.Alternate = COMP_VDS_SR1_OUT_AF;
+    HAL_GPIO_Init(COMP_VDS_SR1_OUT_GPIO_PORT, &GPIO_InitStruct);
+    
+    /* Debug COMP_VDS_SR2 Out */
+    GPIO_InitStruct.Pin = COMP_VDS_SR2_OUT_GPIO_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF13_HRTIM1;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = PWM_FB_HS1_Pin|PWM_FB_LS1_Pin|PWM_FB_HS2_Pin|PWM_FB_LS2_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF13_HRTIM1;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /* USER CODE BEGIN HRTIM1_MspPostInit 1 */
-
-  /* USER CODE END HRTIM1_MspPostInit 1 */
-  }
-
-}
-/**
-* @brief HRTIM MSP De-Initialization
-* This function freeze the hardware resources used in this example
-* @param hhrtim: HRTIM handle pointer
-* @retval None
-*/
-void HAL_HRTIM_MspDeInit(HRTIM_HandleTypeDef* hhrtim)
-{
-  if(hhrtim->Instance==HRTIM1)
-  {
-  /* USER CODE BEGIN HRTIM1_MspDeInit 0 */
-
-  /* USER CODE END HRTIM1_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_HRTIM1_CLK_DISABLE();
-  /* USER CODE BEGIN HRTIM1_MspDeInit 1 */
-
-  /* USER CODE END HRTIM1_MspDeInit 1 */
-  }
-
+    GPIO_InitStruct.Alternate = COMP_VDS_SR2_OUT_AF;
+    HAL_GPIO_Init(COMP_VDS_SR2_OUT_GPIO_PORT, &GPIO_InitStruct);
+  #endif
+    
+    // set config for output of channel 2
+    
+  /*##-3- Configure the NVIC for COMP_OC ########################################*/
+  /* NVIC for COMP_OC */
+//  HAL_NVIC_SetPriority(COMP_OC_IRQn, 0, 0);
+//  HAL_NVIC_EnableIRQ(COMP_OC_IRQn);
+#endif
+  
 }
 
 /**
-* @brief TIM_Base MSP Initialization
-* This function configures the hardware resources used in this example
-* @param htim_base: TIM_Base handle pointer
-* @retval None
-*/
-void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
+  * @brief  DeInitializes the COMP MSP.
+  * @param  hcomp: pointer to a COMP_HandleTypeDef structure that contains
+  *         the configuration information for the specified COMP.  
+  * @retval None
+  */
+void HAL_COMP_MspDeInit(COMP_HandleTypeDef* hcomp)
 {
-  if(htim_base->Instance==TIM3)
-  {
-  /* USER CODE BEGIN TIM3_MspInit 0 */
-
-  /* USER CODE END TIM3_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_TIM3_CLK_ENABLE();
-  /* USER CODE BEGIN TIM3_MspInit 1 */
-
-  /* USER CODE END TIM3_MspInit 1 */
-  }
-  else if(htim_base->Instance==TIM15)
-  {
-  /* USER CODE BEGIN TIM15_MspInit 0 */
-
-  /* USER CODE END TIM15_MspInit 0 */
-    /* Peripheral clock enable */
-    __HAL_RCC_TIM15_CLK_ENABLE();
-  /* USER CODE BEGIN TIM15_MspInit 1 */
-
-  /* USER CODE END TIM15_MspInit 1 */
-  }
-
+  /*##-1- Disable peripherals and GPIO Clocks ################################*/
+  /* De-initialize the COMPx GPIO pin */
+  HAL_GPIO_DeInit(COMP_OC_GPIO_PORT, COMP_OC_PIN);
+                
+  /*##-2- Disable the NVIC for COMP ###########################################*/
+  HAL_NVIC_DisableIRQ(COMP_OC_IRQn);
 }
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(htim->Instance==TIM3)
-  {
-  /* USER CODE BEGIN TIM3_MspPostInit 0 */
-
-  /* USER CODE END TIM3_MspPostInit 0 */
-
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**TIM3 GPIO Configuration
-    PB1     ------> TIM3_CH4
-    */
-    GPIO_InitStruct.Pin = FAN_PWM_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
-    HAL_GPIO_Init(FAN_PWM_GPIO_Port, &GPIO_InitStruct);
-
-  /* USER CODE BEGIN TIM3_MspPostInit 1 */
-
-  /* USER CODE END TIM3_MspPostInit 1 */
-  }
-
-}
 /**
-* @brief TIM_Base MSP De-Initialization
-* This function freeze the hardware resources used in this example
-* @param htim_base: TIM_Base handle pointer
-* @retval None
-*/
-void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
+  * @brief DAC MSP Initialization 
+  *        This function configures the hardware resources used in this example: 
+  *           - Peripheral's clock enable
+  *           - Peripheral's GPIO Configuration  
+  * @param hdac: DAC handle pointer
+  * @retval None
+  */
+void HAL_DAC_MspInit(DAC_HandleTypeDef* hdac)
 {
-  if(htim_base->Instance==TIM3)
-  {
-  /* USER CODE BEGIN TIM3_MspDeInit 0 */
+  GPIO_InitTypeDef  GPIO_InitStruct;
+  
+#ifdef OVERCURRENT_PROTECTION 
+  /*##-1- Enable peripherals and GPIO Clocks #################################*/
+  /* Enable GPIO clock ****************************************/
+  DAC_OC_CHANNEL_GPIO_CLK_ENABLE();
+  /* DAC Periph clock enable */
+  DAC_OC_CLK_ENABLE();
+  
+  /*##-2- Configure peripheral GPIO ##########################################*/  
+  /* DAC Channel1 GPIO pin configuration */
+  GPIO_InitStruct.Pin = DAC_OC_CHANNEL_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(DAC_OC_CHANNEL_GPIO_PORT, &GPIO_InitStruct);
+#endif 
+  
+#ifdef ADAPTIVE_SYNCH_RECTIFICATION
+    /*##-1- Enable peripherals and GPIO Clocks #################################*/
+  /* Enable GPIO clock ****************************************/
+  DAC_SR_CHANNEL_GPIO_CLK_ENABLE();
+  /* DAC Periph clock enable */
+  DAC_SR_CLK_ENABLE();
+  
+  /*##-2A- Configure peripheral GPIO ##########################################*/  
+  /* DAC Channel1 GPIO pin configuration */
+  GPIO_InitStruct.Pin = DAC_SR_CHANNEL1_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(DAC_SR_CHANNEL1_GPIO_PORT, &GPIO_InitStruct);
+  
+  /*##-2B- Configure peripheral GPIO ##########################################*/  
+  /* DAC Channel1 GPIO pin configuration */
+  GPIO_InitStruct.Pin = DAC_SR_CHANNEL2_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(DAC_SR_CHANNEL2_GPIO_PORT, &GPIO_InitStruct);
+#endif
+  
+}
 
-  /* USER CODE END TIM3_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_TIM3_CLK_DISABLE();
-  /* USER CODE BEGIN TIM3_MspDeInit 1 */
+/**
+  * @brief  DeInitializes the DAC MSP.
+  * @param  hdac: pointer to a DAC_HandleTypeDef structure that contains
+  *         the configuration information for the specified DAC.  
+  * @retval None
+  */
+void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac)
+{
+  /* Enable DAC reset state */
+  DAC_OC_FORCE_RESET();
+  
+  /* Release DAC from reset state */
+  DAC_OC_RELEASE_RESET();
+}
 
-  /* USER CODE END TIM3_MspDeInit 1 */
-  }
-  else if(htim_base->Instance==TIM15)
-  {
-  /* USER CODE BEGIN TIM15_MspDeInit 0 */
+/**
+  * @brief UART MSP Initialization 
+  *        This function configures the hardware resources used in this example: 
+  *           - Peripheral's clock enable
+  *           - Peripheral's GPIO Configuration  
+  *           - DMA configuration for transmission request by peripheral 
+  *           - NVIC configuration for DMA interrupt request enable
+  * @param huart: UART handle pointer
+  * @retval None
+  */
+void HAL_UART_MspInit(UART_HandleTypeDef *huart)
+{  
+  #ifdef UI_COMMUNICATION
+    UI_UART_MspInit(huart);
+  #endif
+  
+  /************* DSMPS B2B COMMUNICATION **************************/
+//  static DMA_HandleTypeDef hdma_tx;
+//  static DMA_HandleTypeDef hdma_rx;
+//  
+//  GPIO_InitTypeDef  GPIO_InitStruct;
+//  
+//  /*##-1- Enable peripherals and GPIO Clocks #################################*/
+//  /* Enable GPIO clock */
+//  USARTx_TX_GPIO_CLK_ENABLE();
+//  USARTx_RX_GPIO_CLK_ENABLE();
+//  
+//  /* Enable USARTx clock */
+//  USARTx_CLK_ENABLE(); 
+//  /* Enable DMAx clock */
+//  DMAx_CLK_ENABLE();   
+//  
+//  /*##-2- Configure peripheral GPIO ##########################################*/  
+//  /* UART TX GPIO pin configuration  */
+//  GPIO_InitStruct.Pin       = USARTx_TX_PIN;
+//  GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+//  GPIO_InitStruct.Pull      = GPIO_PULLUP;
+//  GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
+//  GPIO_InitStruct.Alternate = USARTx_TX_AF;
+//    
+//  HAL_GPIO_Init(USARTx_TX_GPIO_PORT, &GPIO_InitStruct);
+//    
+//  /* UART RX GPIO pin configuration  */
+//  GPIO_InitStruct.Pin = USARTx_RX_PIN;
+//  GPIO_InitStruct.Alternate = USARTx_RX_AF;
+//    
+//  HAL_GPIO_Init(USARTx_RX_GPIO_PORT, &GPIO_InitStruct);
+//    
+//  /*##-3- Configure the DMA streams ##########################################*/
+//  /* Configure the DMA handler for Transmission process */
+//  hdma_tx.Instance                 = USARTx_TX_DMA_CHANNEL;
+//  hdma_tx.Init.Direction           = DMA_MEMORY_TO_PERIPH;
+//  hdma_tx.Init.PeriphInc           = DMA_PINC_DISABLE;
+//  hdma_tx.Init.MemInc              = DMA_MINC_ENABLE;
+//  hdma_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+//  hdma_tx.Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+//  hdma_tx.Init.Mode                = DMA_NORMAL; 
+//  hdma_tx.Init.Priority            = DMA_PRIORITY_LOW;
+//  
+//  HAL_DMA_Init(&hdma_tx);   
+//  
+//  /* Associate the initialized DMA handle to the UART handle */
+//  __HAL_LINKDMA(huart, hdmatx, hdma_tx);
+//    
+//  /* Configure the DMA handler for reception process */
+//  hdma_rx.Instance = USARTx_RX_DMA_CHANNEL; 
+//  hdma_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+//  hdma_rx.Init.PeriphInc = DMA_PINC_DISABLE;
+//  hdma_rx.Init.MemInc = DMA_MINC_ENABLE;
+//  hdma_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+//  hdma_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+//  hdma_rx.Init.Mode = DMA_CIRCULAR;
+//  hdma_rx.Init.Priority = DMA_PRIORITY_LOW; //DMA_PRIORITY_VERY_HIGH;
+//
+//  HAL_DMA_Init(&hdma_rx);
+//    
+//  /* Associate the initialized DMA handle to the the UART handle */
+//  __HAL_LINKDMA(huart, hdmarx, hdma_rx);
+//    
+//  /*##-4- Configure the NVIC for DMA #########################################*/   
+//  /* NVIC configuration for DMA transfer complete interrupt (USARTx_TX) */
+//  HAL_NVIC_SetPriority(USARTx_DMA_TX_IRQn, 8, 0);
+//  HAL_NVIC_EnableIRQ(USARTx_DMA_TX_IRQn);
+//    
+//  /* NVIC configuration for DMA transfer complete interrupt (USARTx_RX) */
+//  HAL_NVIC_SetPriority(USARTx_DMA_RX_IRQn, 9, 0);   
+//  HAL_NVIC_EnableIRQ(USARTx_DMA_RX_IRQn);
+//  
+//  /* NVIC for USARTx */
+////  HAL_NVIC_SetPriority(USARTx_IRQn, 8, 1);
+////  HAL_NVIC_EnableIRQ(USARTx_IRQn);  
+  /**********************************************************************/
+}
 
-  /* USER CODE END TIM15_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_TIM15_CLK_DISABLE();
-  /* USER CODE BEGIN TIM15_MspDeInit 1 */
+/**
+  * @brief UART MSP De-Initialization 
+  *        This function frees the hardware resources used in this example:
+  *          - Disable the Peripheral's clock
+  *          - Revert GPIO, DMA and NVIC configuration to their default state
+  * @param huart: UART handle pointer
+  * @retval None
+  */
+void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
+{
+  #ifdef UI_COMMUNICATION
+    UI_UART_MspDeInit(huart);
+  #endif
+    
+/************* DSMPS B2B COMMUNICATION **************************/    
+//  static DMA_HandleTypeDef hdma_tx;
+//  static DMA_HandleTypeDef hdma_rx;
+//
+//  /*##-1- Reset peripherals ##################################################*/
+//  USARTx_FORCE_RESET();
+//  USARTx_RELEASE_RESET();
+//
+//  /*##-2- Disable peripherals and GPIO Clocks #################################*/
+//  /* Configure UART Tx as alternate function  */
+//  HAL_GPIO_DeInit(USARTx_TX_GPIO_PORT, USARTx_TX_PIN);
+//  /* Configure UART Rx as alternate function  */
+//  HAL_GPIO_DeInit(USARTx_RX_GPIO_PORT, USARTx_RX_PIN);
+//   
+//  /*##-3- Disable the DMA Streams ############################################*/
+//  /* De-Initialize the DMA Stream associate to transmission process */
+//  HAL_DMA_DeInit(&hdma_tx); 
+//  /* De-Initialize the DMA Stream associate to reception process */
+//  HAL_DMA_DeInit(&hdma_rx);
+//  
+//  /*##-4- Disable the NVIC for DMA ###########################################*/
+//  HAL_NVIC_DisableIRQ(USARTx_DMA_TX_IRQn);
+//  HAL_NVIC_DisableIRQ(USARTx_DMA_RX_IRQn);
+//  
+//  /*##-5- Disable the NVIC for UART ##########################################*/
+//  HAL_NVIC_DisableIRQ(USARTx_IRQn);
+    /**********************************************************************/
+}
 
-  /* USER CODE END TIM15_MspDeInit 1 */
-  }
+/**
+  * @brief  Initializes the TIM PWM MSP.
+  * @param  htim: TIM handle
+  * @retval None
+  */
+void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)
+{    
+  
+#ifdef FAN_PWM_DRIVING
+  GPIO_InitTypeDef      GPIO_InitStruct;
+  
+  /*##-1- Enable peripherals and GPIO Clocks #################################*/
+  /* TIM6 Periph clock enable */
+//  __TIM16_CLK_ENABLE();
+  /* FAN PWM TIM Periph clock enable */
+  FAN_PWM_CLK_ENABLE();
+  
+  /*##-2- Configure peripheral GPIO ##########################################*/ 
+  /* TIM GPIO pin configuration - Debug output blanking window */
+  GPIO_InitStruct.Pin = FAN_PWM_GPIO_PIN; 
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL; //GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+  GPIO_InitStruct.Alternate = FAN_PWM_TIM_AF; 
+  HAL_GPIO_Init(FAN_PWM_GPIO_PORT, &GPIO_InitStruct); 
+
+//  HAL_NVIC_SetPriority(TIM6_DAC1_IRQn, 7, 0);
+//  HAL_NVIC_EnableIRQ(TIM6_DAC1_IRQn);
+  
+//  HAL_NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 7, 0);
+//  HAL_NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn);  
+#endif
 
 }
 
-/* USER CODE BEGIN 1 */
+/**
+  * @brief  DeInitializes TIM PWM MSP.
+  * @param  htim: TIM handle
+  * @retval None
+  */
+void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef *htim)
+{
+  /*##-1- Disable peripherals and GPIO Clocks #################################*/
+  /* FAN PWM TIM Periph clock enable */
+  FAN_PWM_CLK_DISABLE();  
+}
 
-/* USER CODE END 1 */
+/**
+  * @brief  Initializes the TIM Base MSP.
+  * @param  htim: TIM handle
+  * @retval None
+  */
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
+{
+  /* TIM6 Periph clock enable */
+  __TIM6_CLK_ENABLE();
+  
+  /* TIM16 Periph clock enable */
+  __TIM16_CLK_ENABLE();
+   
+  /* Configure and enable TIM6 interrupt channel in NVIC */
+  HAL_NVIC_SetPriority(TIM6_DAC1_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(TIM6_DAC1_IRQn);
+  
+  HAL_NVIC_SetPriority(TIM16_IRQn, 9, 0);
+  HAL_NVIC_EnableIRQ(TIM16_IRQn);
+}
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

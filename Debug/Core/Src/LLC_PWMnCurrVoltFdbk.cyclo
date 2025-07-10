@@ -1,0 +1,9 @@
+../Core/Src/LLC_PWMnCurrVoltFdbk.c:54:6:PWM_PeriodActuation	1
+../Core/Src/LLC_PWMnCurrVoltFdbk.c:87:6:PWM_SynchRectActuation	3
+../Core/Src/LLC_PWMnCurrVoltFdbk.c:161:6:PWM_SynchRectActuationDT	3
+../Core/Src/LLC_PWMnCurrVoltFdbk.c:237:6:PWM_PeriodSynchRectActuationDT	3
+../Core/Src/LLC_PWMnCurrVoltFdbk.c:322:6:PWM_DeadTimeActuation	1
+../Core/Src/LLC_PWMnCurrVoltFdbk.c:348:6:PWM_UpdateBurstModeParams	1
+../Core/Src/LLC_PWMnCurrVoltFdbk.c:366:6:PWM_FanActuation	6
+../Core/Src/LLC_PWMnCurrVoltFdbk.c:406:10:PWM_GetVdsSRMeasure	2
+../Core/Src/LLC_PWMnCurrVoltFdbk.c:422:10:PWM_ConvertCurrentValue	1

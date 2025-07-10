@@ -1,0 +1,12 @@
+../Core/Src/LLC_Init_Periph.c:79:6:SystemClock_Config	72	static
+../Core/Src/LLC_Init_Periph.c:114:6:GPIO_Config	72	static
+../Core/Src/LLC_Init_Periph.c:171:6:ADC_Config	168	static
+../Core/Src/LLC_Init_Periph.c:484:6:HRTIM_Config	304	static
+../Core/Src/LLC_Init_Periph.c:984:6:TIM6_VoutControl_Config	8	static
+../Core/Src/LLC_Init_Periph.c:1009:6:FAN_TIM_Config	48	static
+../Core/Src/LLC_Init_Periph.c:1056:6:TIM16_LowFrequencyTask_Config	8	static
+../Core/Src/LLC_Init_Periph.c:1081:6:COMP_OverCurrProtection_Config	8	static
+../Core/Src/LLC_Init_Periph.c:1115:6:COMP_AdaptiveSR_Config	16	static
+../Core/Src/LLC_Init_Periph.c:1177:6:DAC_OverCurrProtection_Config	24	static
+../Core/Src/LLC_Init_Periph.c:1222:6:DAC_AdaptiveSR_Config	32	static
+../Core/Src/LLC_Init_Periph.c:1293:6:USART_Config	0	static

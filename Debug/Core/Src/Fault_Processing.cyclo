@@ -1,0 +1,8 @@
+../Core/Src/Fault_Processing.c:539:6:FLT_SetSystemFault	1
+../Core/Src/Fault_Processing.c:100:6:HRTIM1_FLT_IRQHandler	4
+../Core/Src/Fault_Processing.c:200:6:FLT_FaultCheck	47
+../Core/Src/Fault_Processing.c:516:6:FLT_StartUpFailedProcedure	4
+../Core/Src/Fault_Processing.c:549:17:FLT_GetSystemFault	1
+../Core/Src/Fault_Processing.c:559:10:FLT_GetLastShownSystemFault	1
+../Core/Src/Fault_Processing.c:579:6:FLT_ClearAllSystemFaults	1
+../Core/Src/Fault_Processing.c:601:6:FLT_StoreLastSystemFault	1

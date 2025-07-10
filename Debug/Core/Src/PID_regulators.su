@@ -1,0 +1,16 @@
+../Core/Src/PID_regulators.c:41:6:PID_Set_ProportionalGain	0	static
+../Core/Src/PID_regulators.c:52:6:PID_Set_IntegralGain	0	static
+../Core/Src/PID_regulators.c:62:6:PID_Reset_IntegralTerm	0	static
+../Core/Src/PID_regulators.c:73:6:PID_Set_IntegralTerm	8	static
+../Core/Src/PID_regulators.c:95:6:PID_Set_OutputUpperLimit	0	static
+../Core/Src/PID_regulators.c:106:6:PID_Set_OutputLowerLimit	0	static
+../Core/Src/PID_regulators.c:124:9:PID_Regulator	20	static
+../Core/Src/PID_regulators.c:234:9:PID_Controller	12	static
+../Core/Src/PID_regulators.c:305:6:PID_Set_ProportionalGain_ex	0	static
+../Core/Src/PID_regulators.c:316:6:PID_Set_IntegralGain_ex	0	static
+../Core/Src/PID_regulators.c:326:6:PID_Reset_IntegralTerm_ex	0	static
+../Core/Src/PID_regulators.c:341:6:PID_Set_IntegralTerm_ex	8	static
+../Core/Src/PID_regulators.c:363:6:PID_Set_OutputUpperLimit_ex	0	static
+../Core/Src/PID_regulators.c:374:6:PID_Set_OutputLowerLimit_ex	0	static
+../Core/Src/PID_regulators.c:392:9:PID_Regulator_ex	20	static
+../Core/Src/PID_regulators.c:538:6:DCDC_PID_Init_ex	0	static

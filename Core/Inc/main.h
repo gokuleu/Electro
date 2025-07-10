@@ -53,6 +53,9 @@ void HAL_HRTIM_MspPostInit(HRTIM_HandleTypeDef *hhrtim);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
+uint16_t get_dc_offset(uint16_t new_sample);
+float moving_AC_voltage_measured_fun( float current_val , float MOV_AVG_SAMPLE);
+uint16_t median_filter(uint16_t* buffer) ;
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 

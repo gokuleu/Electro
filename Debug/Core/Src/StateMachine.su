@@ -1,0 +1,12 @@
+../Core/Src/StateMachine.c:77:6:STM_StateMachineTask	24	static
+../Core/Src/StateMachine.c:268:6:STM_SetStateMachineStatus	0	static
+../Core/Src/StateMachine.c:278:15:STM_GetStateMachineStatus	0	static
+../Core/Src/StateMachine.c:288:6:STM_SetConverterEnabledFag	0	static
+../Core/Src/StateMachine.c:298:6:STM_GetConverterEnabledFag	0	static
+../Core/Src/StateMachine.c:312:6:LED_On	8	static
+../Core/Src/StateMachine.c:323:6:LED_Off	8	static
+../Core/Src/StateMachine.c:334:6:LED_Toggle	8	static
+../Core/Src/StateMachine.c:345:6:LED_DecreaseBlinkCounter	0	static
+../Core/Src/StateMachine.c:357:6:LED_Init	0	static
+../Core/Src/StateMachine.c:375:6:LED_SetParams	0	static
+../Core/Src/StateMachine.c:390:6:LED_Task	8	static
