@@ -12,6 +12,7 @@ CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
 extern CAN_HandleTypeDef hcan;
 extern uint16_t ADC_VAL_1[7];
+extern float rms_adc;
 
 
 uint8_t RxData[8];
@@ -32,6 +33,8 @@ void Send_on_CAN(){
 	  uint32_t time_count = HAL_GetTick();
 	  static uint32_t Prev_time = 0;
 	  uint8_t tempxxxx;
+	  uint16_t rms_input_voltage=0;
+			  rms_input_voltage=rms_adc;
 	  if(time_count - Prev_time > 100){
 		  	Prev_time = time_count;
 		  	double resistance = (ADC_VAL_1[4] * NTC_PULL_UP_RESISTOR)/(Adc_max_COUNT - ADC_VAL_1[4]);
@@ -51,10 +54,18 @@ void Send_on_CAN(){
 		  	TxData[3] = (ADC_VAL_1[1]&0xff00)>>8;
 		  	TxData[4] = ADC_VAL_1[7]&0xff;
 		  	TxData[5] = (ADC_VAL_1[7]&0xff00)>>8;
-		  	TxData[6] = ADC_VAL_1[3]&0xff;
+//		  	TxData[6] = ADC_VAL_1[3]&0xff;
 		  	TxData[7] = tempxxxx;
 
 		  	Transmit_On_CAN(0x18FF50E5, TxData);
+			TxData[0] = (rms_input_voltage)&0xff;
+			TxData[1] = ((rms_input_voltage)&0xff00)>>8;
+			TxData[2] = ADC_VAL_1[1]&0xff;
+			TxData[3] = (ADC_VAL_1[1]&0xff00)>>8;
+			TxData[4] = ADC_VAL_1[7]&0xff;
+			TxData[5] = (ADC_VAL_1[7]&0xff00)>>8;
+			TxData[6] = ADC_VAL_1[3]&0xff;
+			TxData[7] = tempxxxx;
 		  	Transmit_On_CAN(0x18FF50E6, TxData);
 		  }
 }
@@ -107,8 +118,8 @@ uint32_t temp = HRTIM1_TIMA->DTxR;
 temp &= ~HRTIM_DTR_DTR_Msk;           // Clear rising bits
 temp |= (deadtime & 0x1FF);            // Set new rising time
 
-//temp &= ~HRTIM_DTR_DTF_Msk;           // Clear falling bits
-//temp |= ((deadtime & 0x1FF) << 16);    // Set new falling time
+temp &= ~HRTIM_DTR_DTF_Msk;           // Clear falling bits
+temp |= ((deadtime & 0x1FF) << 16);    // Set new falling time
 
 HRTIM1_TIMA->DTxR = temp;
 
@@ -119,8 +130,8 @@ temp = HRTIM1_TIMB->DTxR;
 temp &= ~HRTIM_DTR_DTR_Msk;           // Clear rising bits
 temp |= (deadtime & 0x1FF);            // Set new rising time
 
-//temp &= ~HRTIM_DTR_DTF_Msk;           // Clear falling bits
-//temp |= ((deadtime & 0x1FF) << 16);    // Set new falling time
+temp &= ~HRTIM_DTR_DTF_Msk;           // Clear falling bits
+temp |= ((deadtime & 0x1FF) << 16);    // Set new falling time
 
 HRTIM1_TIMB->DTxR = temp;
 

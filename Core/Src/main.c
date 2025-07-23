@@ -31,6 +31,19 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define ADC_OFFSET 2048      // For 12-bit, mid-rail offset
+#define SAMPLES_PER_CYCLE 20
+
+#include <stdint.h>
+#include <string.h> // for memcpy
+
+#define MEDIAN_WINDOW 100
+
+uint16_t adc_buffer[MEDIAN_WINDOW] = {0};
+uint8_t buf_index = 0;
+uint8_t samples_collected = 0;
+
+float sum_squares = 0;
 
 /* USER CODE END PD */
 
@@ -53,12 +66,25 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim15;
 
 /* USER CODE BEGIN PV */
-uint16_t ADC_VAL_1[7];
 uint16_t ADC_VAL_2[2];
+uint16_t ADC_VAL_1[7];
 volatile int count = 0;
 uint16_t voltage;
+uint16_t voltage_1;
+uint16_t voltage_2;
 uint16_t temp1;
+float rms_adc;
+uint32_t samples;
+float samples_f;
+#define N 500  // Number of samples (e.g., for 1 kHz sampling, this is 50 ms)
+char status=0;
+uint16_t filtered ;
+uint16_t buffer[N];
+uint32_t sum = 0;
+//uint8_t index = 0;
 
+uint16_t raw=0;
+//uint32_t sum =0;
 
 /* USER CODE END PV */
 
@@ -154,11 +180,40 @@ int main(void)
 //  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
   while (1)
   {
-	Send_on_CAN();
+	// Send_on_CAN();
 	count++;
-//	voltage=(420/4096)*ADC_VAL[2];
-	voltage=ADC_VAL_1[2];
-	temp1=ADC_VAL_2[1];
+
+//	voltage=ADC_VAL_1[6];
+
+	temp1=ADC_VAL_1[2];
+  ///////////
+
+// for (int i = 0; i < 50; i++)
+// {
+//   raw=ADC_VAL_1[2];
+//   sum=raw+sum;
+// }
+// samples=sum/50;
+// sum=0;
+
+//samples=moving_AC_voltage_measured_fun(ADC_VAL_1[2], 500);
+
+//voltage_2=moving_AC_voltage_measured_fun(voltage_1, 100);
+//
+// adc_buffer[buf_index] = voltage_1;
+// buf_index = (buf_index + 1) % MEDIAN_WINDOW;
+// if (samples_collected < MEDIAN_WINDOW) samples_collected++;
+//
+// // Apply filter only when buffer is filled at least once
+//  filtered = voltage_1;
+// if (samples_collected >= MEDIAN_WINDOW) {
+//     voltage_1 = median_filter(adc_buffer);
+// }
+// voltage=(3.3f/4096.0f)*((float)samples );
+// voltage_1=(1.33*(420.0f/4096.0f))*((float)samples );
+
+ 
+  //////////
 
     /* USER CODE END WHILE */
 
@@ -502,7 +557,7 @@ static void MX_HRTIM1_Init(void)
   {
     Error_Handler();
   }
-  pTimeBaseCfg.Period = 65503;
+  pTimeBaseCfg.Period = 11702;
   pTimeBaseCfg.RepetitionCounter = 0x00;
   pTimeBaseCfg.PrescalerRatio = HRTIM_PRESCALERRATIO_MUL32;
   pTimeBaseCfg.Mode = HRTIM_MODE_CONTINUOUS;
@@ -560,11 +615,11 @@ static void MX_HRTIM1_Init(void)
     Error_Handler();
   }
   pDeadTimeCfg.Prescaler = HRTIM_TIMDEADTIME_PRESCALERRATIO_DIV2;
-  pDeadTimeCfg.RisingValue = 100;
+  pDeadTimeCfg.RisingValue = 10;
   pDeadTimeCfg.RisingSign = HRTIM_TIMDEADTIME_RISINGSIGN_POSITIVE;
   pDeadTimeCfg.RisingLock = HRTIM_TIMDEADTIME_RISINGLOCK_WRITE;
   pDeadTimeCfg.RisingSignLock = HRTIM_TIMDEADTIME_RISINGSIGNLOCK_WRITE;
-  pDeadTimeCfg.FallingValue = 0x000;
+  pDeadTimeCfg.FallingValue = 10;
   pDeadTimeCfg.FallingSign = HRTIM_TIMDEADTIME_FALLINGSIGN_POSITIVE;
   pDeadTimeCfg.FallingLock = HRTIM_TIMDEADTIME_FALLINGLOCK_WRITE;
   pDeadTimeCfg.FallingSignLock = HRTIM_TIMDEADTIME_FALLINGSIGNLOCK_WRITE;
@@ -601,12 +656,10 @@ static void MX_HRTIM1_Init(void)
   {
     Error_Handler();
   }
-  pOutputCfg.Polarity = HRTIM_OUTPUTPOLARITY_LOW;
   if (HAL_HRTIM_WaveformOutputConfig(&hhrtim1, HRTIM_TIMERINDEX_TIMER_B, HRTIM_OUTPUT_TB1, &pOutputCfg) != HAL_OK)
   {
     Error_Handler();
   }
-  pOutputCfg.Polarity = HRTIM_OUTPUTPOLARITY_HIGH;
   pOutputCfg.SetSource = HRTIM_OUTPUTSET_TIMCMP1;
   pOutputCfg.ResetSource = HRTIM_OUTPUTRESET_TIMCMP1;
   if (HAL_HRTIM_WaveformOutputConfig(&hhrtim1, HRTIM_TIMERINDEX_TIMER_C, HRTIM_OUTPUT_TC1, &pOutputCfg) != HAL_OK)
@@ -617,13 +670,13 @@ static void MX_HRTIM1_Init(void)
   {
     Error_Handler();
   }
+  pOutputCfg.Polarity = HRTIM_OUTPUTPOLARITY_LOW;
   pOutputCfg.SetSource = HRTIM_OUTPUTSET_NONE;
   pOutputCfg.ResetSource = HRTIM_OUTPUTRESET_NONE;
   if (HAL_HRTIM_WaveformOutputConfig(&hhrtim1, HRTIM_TIMERINDEX_TIMER_A, HRTIM_OUTPUT_TA2, &pOutputCfg) != HAL_OK)
   {
     Error_Handler();
   }
-  pOutputCfg.Polarity = HRTIM_OUTPUTPOLARITY_LOW;
   if (HAL_HRTIM_WaveformOutputConfig(&hhrtim1, HRTIM_TIMERINDEX_TIMER_B, HRTIM_OUTPUT_TB2, &pOutputCfg) != HAL_OK)
   {
     Error_Handler();
@@ -817,6 +870,44 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+//uint16_t get_dc_offset(uint16_t new_sample) {
+//    sum -= buffer[index];         // Remove old sample
+//    buffer[index] = new_sample;   // Insert new sample
+//    sum += new_sample;
+//
+//    index = (index + 1) % N;
+//
+//    return sum / N;  // DC offset estimate
+//}
+//float moving_AC_voltage_measured_fun( float current_val , float MOV_AVG_SAMPLE)   // 0.1 amp Batt_current_measured
+//{
+//    static float Prev_current_val;
+//    float Bus_Current_Error_value;
+//    Bus_Current_Error_value = (current_val - Prev_current_val);
+//    Prev_current_val += (Bus_Current_Error_value / MOV_AVG_SAMPLE);
+//    current_val = Prev_current_val ;
+//    return current_val ;
+//}
+//
+//
+//
+//uint16_t median_filter(uint16_t* buffer) {
+//    uint16_t temp[MEDIAN_WINDOW];
+//    memcpy(temp, buffer, sizeof(temp));
+//
+//    // Bubble sort
+//    for (int i = 0; i < MEDIAN_WINDOW - 1; ++i) {
+//        for (int j = 0; j < MEDIAN_WINDOW - i - 1; ++j) {
+//            if (temp[j] > temp[j + 1]) {
+//                uint16_t t = temp[j];
+//                temp[j] = temp[j + 1];
+//                temp[j + 1] = t;
+//            }
+//        }
+//    }
+//    return temp[MEDIAN_WINDOW / 2]; // Median
+//}
+
 
 /* USER CODE END 4 */
 
