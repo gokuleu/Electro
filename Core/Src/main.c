@@ -156,6 +156,7 @@ int main(void)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, GPIO_PIN_SET);
   // Start the HRTIM Timer C PWM outputs
   HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_MASTER);
 
@@ -615,11 +616,11 @@ static void MX_HRTIM1_Init(void)
     Error_Handler();
   }
   pDeadTimeCfg.Prescaler = HRTIM_TIMDEADTIME_PRESCALERRATIO_DIV2;
-  pDeadTimeCfg.RisingValue = 10;
+  pDeadTimeCfg.RisingValue = 30;
   pDeadTimeCfg.RisingSign = HRTIM_TIMDEADTIME_RISINGSIGN_POSITIVE;
   pDeadTimeCfg.RisingLock = HRTIM_TIMDEADTIME_RISINGLOCK_WRITE;
   pDeadTimeCfg.RisingSignLock = HRTIM_TIMDEADTIME_RISINGSIGNLOCK_WRITE;
-  pDeadTimeCfg.FallingValue = 10;
+  pDeadTimeCfg.FallingValue = 30;
   pDeadTimeCfg.FallingSign = HRTIM_TIMDEADTIME_FALLINGSIGN_POSITIVE;
   pDeadTimeCfg.FallingLock = HRTIM_TIMDEADTIME_FALLINGLOCK_WRITE;
   pDeadTimeCfg.FallingSignLock = HRTIM_TIMDEADTIME_FALLINGSIGNLOCK_WRITE;
@@ -855,10 +856,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, PFC_CTRL_out_Pin|RLY_CTRL_output_Pin|SD_OD_output_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, PFC_CTRL_out_Pin|RLY_CTRL_output_Pin|GPIO_PIN_10|SD_OD_output_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PFC_CTRL_out_Pin RLY_CTRL_output_Pin SD_OD_output_Pin */
-  GPIO_InitStruct.Pin = PFC_CTRL_out_Pin|RLY_CTRL_output_Pin|SD_OD_output_Pin;
+  /*Configure GPIO pins : PFC_CTRL_out_Pin RLY_CTRL_output_Pin PC10 SD_OD_output_Pin */
+  GPIO_InitStruct.Pin = PFC_CTRL_out_Pin|RLY_CTRL_output_Pin|GPIO_PIN_10|SD_OD_output_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
