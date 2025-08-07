@@ -53,6 +53,8 @@ void HAL_HRTIM_MspPostInit(HRTIM_HandleTypeDef *hhrtim);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
+int32_t moving_AC_voltage_measured_fun( int32_t current_val , int32_t MOV_AVG_SAMPLE);
+//float moving_AC_voltage_measured_fun( float current_val , float MOV_AVG_SAMPLE)   ;// 0.1 amp Batt_current_measured
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 

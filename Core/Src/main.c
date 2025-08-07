@@ -64,6 +64,7 @@ HRTIM_HandleTypeDef hhrtim1;
 
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim15;
+TIM_HandleTypeDef htim16;
 
 /* USER CODE BEGIN PV */
 uint16_t ADC_VAL_2[2];
@@ -74,7 +75,7 @@ uint16_t voltage_1;
 uint16_t voltage_2;
 uint16_t temp1;
 float rms_adc;
-uint32_t samples;
+float samples;
 float samples_f;
 #define N 500  // Number of samples (e.g., for 1 kHz sampling, this is 50 ms)
 char status=0;
@@ -98,6 +99,7 @@ static void MX_TIM15_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_HRTIM1_Init(void);
+static void MX_TIM16_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -143,33 +145,36 @@ int main(void)
   MX_TIM3_Init();
   MX_ADC2_Init();
   MX_HRTIM1_Init();
+  MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
   if (HAL_ADC_Start_DMA(&hadc1, ADC_VAL_1, 7) != HAL_OK) {
        Error_Handler();  // <-- Might be going here
    }
-  if (HAL_ADC_Start_DMA(&hadc2, ADC_VAL_2, 2) != HAL_OK) {
-         Error_Handler();  // <-- Might be going here
-     }
+//  if (HAL_ADC_Start_DMA(&hadc2, ADC_VAL_2, 2) != HAL_OK) {
+//         Error_Handler();  // <-- Might be going here
+//     }
   HAL_TIM_Base_Start(&htim15);
   TIM3->CCR4 = 90;
   HAL_TIM_Base_Start(&htim3);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
+  HAL_TIM_Base_Start_IT(&htim16);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_11, GPIO_PIN_SET);
   // Start the HRTIM Timer C PWM outputs
-  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_MASTER);
+//  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_MASTER);
 
-  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_A);
-  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_B);
-  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_C);
-  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_D);
+  // HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_A);
+  // HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_B);
+  // HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_C);
+  // HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_D);
 //  HAL_HRTIM_WaveformOutputStart(&hhrtim1, HRTIM_OUTPUT_TC1);
 //  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_C);
-  HAL_HRTIM_WaveformOutputStart(&hhrtim1, HRTIM_OUTPUT_TC1 | HRTIM_OUTPUT_TC2
-		  | HRTIM_OUTPUT_TA1 | HRTIM_OUTPUT_TA2
-		  | HRTIM_OUTPUT_TB1 | HRTIM_OUTPUT_TB2
-		  | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2);
+//  HAL_HRTIM_WaveformOutputStart(&hhrtim1, HRTIM_OUTPUT_TC1 | HRTIM_OUTPUT_TC2
+//		  | HRTIM_OUTPUT_TA1 | HRTIM_OUTPUT_TA2
+//		  | HRTIM_OUTPUT_TB1 | HRTIM_OUTPUT_TB2
+//		  | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2);
 //  HAL_HRTIM_WaveformSetCompare(&hhrtim1, HRTIM_TIMERINDEX_TIMER_C, HRTIM_COMPAREUNIT_1, 50);
 
 //  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
@@ -197,7 +202,7 @@ int main(void)
 // samples=sum/50;
 // sum=0;
 
-//samples=moving_AC_voltage_measured_fun(ADC_VAL_1[2], 500);
+// samples=moving_AC_voltage_measured_fun(ADC_VAL_1[2], 500);
 
 //voltage_2=moving_AC_voltage_measured_fun(voltage_1, 100);
 //
@@ -294,7 +299,7 @@ static void MX_ADC1_Init(void)
   /** Common config
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc1.Init.ClockPrescaler = 63;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
@@ -833,7 +838,7 @@ static void MX_TIM15_Init(void)
 
   /* USER CODE END TIM15_Init 1 */
   htim15.Instance = TIM15;
-  htim15.Init.Prescaler = 0;
+  htim15.Init.Prescaler = 63;
   htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim15.Init.Period = 65535;
   htim15.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -857,6 +862,38 @@ static void MX_TIM15_Init(void)
   /* USER CODE BEGIN TIM15_Init 2 */
 
   /* USER CODE END TIM15_Init 2 */
+
+}
+
+/**
+  * @brief TIM16 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM16_Init(void)
+{
+
+  /* USER CODE BEGIN TIM16_Init 0 */
+
+  /* USER CODE END TIM16_Init 0 */
+
+  /* USER CODE BEGIN TIM16_Init 1 */
+
+  /* USER CODE END TIM16_Init 1 */
+  htim16.Instance = TIM16;
+  htim16.Init.Prescaler = 63;
+  htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim16.Init.Period = 1000;
+  htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim16.Init.RepetitionCounter = 0;
+  htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim16) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM16_Init 2 */
+
+  /* USER CODE END TIM16_Init 2 */
 
 }
 
@@ -913,6 +950,65 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+//float moving_AC_voltage_measured_fun( float current_val , float MOV_AVG_SAMPLE)   // 0.1 amp Batt_current_measured
+//{
+//  static float Prev_current_val;
+//  float Bus_Current_Error_value;
+//  Bus_Current_Error_value = (current_val - Prev_current_val);
+//  Prev_current_val += (Bus_Current_Error_value / MOV_AVG_SAMPLE);
+//  current_val = Prev_current_val ;
+//  return current_val ;
+//}
+
+int32_t moving_AC_voltage_measured_fun( int32_t current_val , int32_t MOV_AVG_SAMPLE)   // 0.1 amp Batt_current_measured
+{
+  static int32_t Prev_current_val;
+  int32_t Bus_Current_Error_value;
+  Bus_Current_Error_value = (current_val - Prev_current_val);
+  Prev_current_val += (Bus_Current_Error_value / MOV_AVG_SAMPLE);
+  current_val = Prev_current_val ;
+  return current_val ;
+}
+
+// int32_t moving_AC_voltage_measured_fun(int32_t current_val, int32_t MOV_AVG_SAMPLE)
+// {
+//     static int32_t Prev_current_val = 0;
+//     static int32_t Remainder = 0;
+
+//     int32_t error = current_val - Prev_current_val;
+//     int32_t scaled_error = error + Remainder; // add leftover
+//     int32_t delta = scaled_error / MOV_AVG_SAMPLE;
+
+//     Prev_current_val += delta;
+//     Remainder = scaled_error - delta * MOV_AVG_SAMPLE;  // retain what's left
+
+//     return Prev_current_val;
+// }
+
+
+//int32_t moving_AC_voltage_measured_fun(int32_t current_val, int32_t MOV_AVG_SAMPLE)
+//{
+//    static int32_t Prev_current_val = 0;
+//    static int32_t Accumulated_Error = 0;
+//
+//    int32_t error = current_val - Prev_current_val;
+//    Accumulated_Error += error;
+//
+//    int32_t delta = Accumulated_Error / MOV_AVG_SAMPLE;
+//
+//    Prev_current_val += delta;
+//    Accumulated_Error -= delta * MOV_AVG_SAMPLE;  // retain remainder
+//
+//    return Prev_current_val;
+//}
+
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+  if(htim->Instance==TIM16){
+    samples=moving_AC_voltage_measured_fun(ADC_VAL_1[2], 400.0f);
+  }
+  
+}
 //uint16_t get_dc_offset(uint16_t new_sample) {
 //    sum -= buffer[index];         // Remove old sample
 //    buffer[index] = new_sample;   // Insert new sample
@@ -922,14 +1018,14 @@ static void MX_GPIO_Init(void)
 //
 //    return sum / N;  // DC offset estimate
 //}
-//float moving_AC_voltage_measured_fun( float current_val , float MOV_AVG_SAMPLE)   // 0.1 amp Batt_current_measured
+//uint32_t moving_AC_voltage_measured_fun( uint32_t current_val , uint32_t MOV_AVG_SAMPLE)   // 0.1 amp Batt_current_measured
 //{
-//    static float Prev_current_val;
-//    float Bus_Current_Error_value;
-//    Bus_Current_Error_value = (current_val - Prev_current_val);
-//    Prev_current_val += (Bus_Current_Error_value / MOV_AVG_SAMPLE);
-//    current_val = Prev_current_val ;
-//    return current_val ;
+//   static uint32_t Prev_current_val;
+//   uint32_t Bus_Current_Error_value;
+//   Bus_Current_Error_value = (current_val - Prev_current_val);
+//   Prev_current_val += (Bus_Current_Error_value / MOV_AVG_SAMPLE);
+//   current_val = Prev_current_val ;
+//   return current_val ;
 //}
 //
 //
