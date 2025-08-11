@@ -445,30 +445,30 @@ void FLT_InputVoltageCheck(void){
   }
 
   /* Input undervoltage check */
-  // if ((hVinVoltageFiltered < IN_VOLTAGE_MIN_L) || ((hVinVoltageFiltered < IN_VOLTAGE_MIN_H)&&(CheckSystemFaultAsserted(DCDC_IN_UNDER_VOLT_ERROR) == TRUE)))
-  //   {
-  //     FLT_SetSystemFault(DCDC_IN_UNDER_VOLT_ERROR);
-  //     /* Update LED blinking if last error is changed */
-  //     if((LED_LastFaultShown != DCDC_IN_UNDER_VOLT_ERROR) && (bFirstFaultDetected == FALSE)){
-  //       /* store last fault shown on LED */
-  //       LED_LastFaultShown = DCDC_IN_UNDER_VOLT_ERROR;
-  //       /* set fault LED Blinking */
-  //       LED_SetParams(&FaultLED, LED_BLINK_N, LED_DCDC_IN_UNDER_VOLTAGE_BLINK_NUM, LED_BLINK_PERIOD_VOLTAGE_ERROR, LED_BLINK_REPETITION_PERIOD_MS);
-  //     }
-  //     bFirstFaultDetected = TRUE;
-  //     if(STM_GetStateMachineStatus() != DSMPS_FAULT){
-  //       STM_SetStateMachineStatus(DSMPS_STOP);
-  //     }
-  //   }
-  //   else{
-  //     /* clear system fault */
-  //     FLT_ClearSystemFault(DCDC_IN_UNDER_VOLT_ERROR);
-  //     /* clear last fault shown if it is DCDC_IN_UNDER_VOLT_ERROR */
-  //     if(LED_LastFaultShown == DCDC_IN_UNDER_VOLT_ERROR)
-  //     {
-  //       LED_LastFaultShown = 0;
-  //     }
-  //   }
+  if ((hVinVoltageFiltered < IN_VOLTAGE_MIN_L) || ((hVinVoltageFiltered < IN_VOLTAGE_MIN_H)&&(CheckSystemFaultAsserted(DCDC_IN_UNDER_VOLT_ERROR) == TRUE)))
+    {
+      FLT_SetSystemFault(DCDC_IN_UNDER_VOLT_ERROR);
+      /* Update LED blinking if last error is changed */
+      if((LED_LastFaultShown != DCDC_IN_UNDER_VOLT_ERROR) && (bFirstFaultDetected == FALSE)){
+        /* store last fault shown on LED */
+        LED_LastFaultShown = DCDC_IN_UNDER_VOLT_ERROR;
+        /* set fault LED Blinking */
+        LED_SetParams(&FaultLED, LED_BLINK_N, LED_DCDC_IN_UNDER_VOLTAGE_BLINK_NUM, LED_BLINK_PERIOD_VOLTAGE_ERROR, LED_BLINK_REPETITION_PERIOD_MS);
+      }
+      bFirstFaultDetected = TRUE;
+      if(STM_GetStateMachineStatus() != DSMPS_FAULT){
+        STM_SetStateMachineStatus(DSMPS_STOP);
+      }
+    }
+    else{
+      /* clear system fault */
+      FLT_ClearSystemFault(DCDC_IN_UNDER_VOLT_ERROR);
+      /* clear last fault shown if it is DCDC_IN_UNDER_VOLT_ERROR */
+      if(LED_LastFaultShown == DCDC_IN_UNDER_VOLT_ERROR)
+      {
+        LED_LastFaultShown = 0;
+      }
+    }
 }
 
 /**

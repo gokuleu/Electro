@@ -46,8 +46,8 @@
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 static void HRTIM_ClearHandle(HRTIM_HandleTypeDef *hhrtim);
-static DMA_HandleTypeDef  hdma_adc1;
-  static DMA_HandleTypeDef  hdma_adc2;
+// static DMA_HandleTypeDef  hdma_adc1;
+//   static DMA_HandleTypeDef  hdma_adc2;
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -131,11 +131,11 @@ void GPIO_Config(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
   
-  GPIO_InitStruct.Pin = STATUS_LED_GPIO_PIN;
-  HAL_GPIO_Init(STATUS_LED_GPIO_PORT, &GPIO_InitStruct);
+  // GPIO_InitStruct.Pin = STATUS_LED_GPIO_PIN;
+  // HAL_GPIO_Init(STATUS_LED_GPIO_PORT, &GPIO_InitStruct);
   
-  GPIO_InitStruct.Pin = FAULT_LED_GPIO_PIN;
-  HAL_GPIO_Init(FAULT_LED_GPIO_PORT, &GPIO_InitStruct);
+  // GPIO_InitStruct.Pin = FAULT_LED_GPIO_PIN;
+  // HAL_GPIO_Init(FAULT_LED_GPIO_PORT, &GPIO_InitStruct);
 
   GPIO_InitStruct.Pin = SD_OD_SR1_GPIO_PIN;
   HAL_GPIO_Init(SD_OD_SR1_GPIO_PORT, &GPIO_InitStruct);
@@ -143,8 +143,8 @@ void GPIO_Config(void)
   GPIO_InitStruct.Pin = SD_OD_SR2_GPIO_PIN;
   HAL_GPIO_Init(SD_OD_SR2_GPIO_PORT, &GPIO_InitStruct);
   
-  GPIO_InitStruct.Pin = DEBUG_DIGITAL_OUT1_GPIO_PIN;
-  HAL_GPIO_Init(DEBUG_DIGITAL_OUT1_GPIO_PORT, &GPIO_InitStruct);
+  // GPIO_InitStruct.Pin = DEBUG_DIGITAL_OUT1_GPIO_PIN;
+  // HAL_GPIO_Init(DEBUG_DIGITAL_OUT1_GPIO_PORT, &GPIO_InitStruct);
    
   /* -3- Reset each GPIO Output */
   HAL_GPIO_WritePin(STATUS_LED_GPIO_PORT, STATUS_LED_GPIO_PIN, GPIO_PIN_RESET);
@@ -454,11 +454,11 @@ void ADC_Config(void)
     /* ADC initialization Error */
     Init_Error_Handler();
   }
-  if (HAL_ADC_Start_DMA(&AdcHandle2, (uint32_t*)&DCDC_MeasureStruct.hTemperature, 1)!= HAL_OK)
-  {
-    /* ADC initialization Error */
-    Init_Error_Handler();
-  }
+  // if (HAL_ADC_Start_DMA(&AdcHandle2, (uint32_t*)&DCDC_MeasureStruct.hTemperature, 1)!= HAL_OK)
+  // {
+  //   /* ADC initialization Error */
+  //   Init_Error_Handler();
+  // }
 
 #ifdef DSMPS_CONTROL_BOARD
   /* start ADCy with DMA request */

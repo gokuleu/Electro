@@ -63,7 +63,7 @@
 /* Private variables ---------------------------------------------------------*/
 #define VOUT_NUM_BIT_FILTER             ((uint8_t)3)    /**< number of bit for output voltage's digital filtering */
 #define VIN_NUM_BIT_FILTER              ((uint8_t)3)    /**< number of bit for input voltage's digital filtering */    
-#define TEMPERATURE_NUM_BIT_FILTER      ((uint8_t)3)    /**< number of bit for Temperature's digital filtering */
+#define TEMPERATURE_NUM_BIT_FILTER      ((uint8_t)8)    /**< number of bit for Temperature's digital filtering */
     
 
 /* Private function prototypes -----------------------------------------------*/

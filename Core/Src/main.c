@@ -62,6 +62,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+volatile int count =0;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
@@ -146,7 +147,7 @@ int main(void)
     /* ---------------- */
     /* Fault management */
     /* ---------------- */
-    DCDC_MeasureStruct.hTemperature= ADC2->DR;
+    // DCDC_MeasureStruct.hTemperature= ADC2->DR;
     /* Check if a fault has occurred */
     FLT_FaultCheck();
       
@@ -156,6 +157,7 @@ int main(void)
     /* manage LED Blinking or ON/OFF */
     LED_Task(&FaultLED);
     LED_Task(&StatusLED);
+    count++;
     
 #ifdef DSMPS_COMMUNICATION
     /* manage USART communication - debug for secondary MCU */
