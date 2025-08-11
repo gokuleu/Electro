@@ -157,24 +157,24 @@ int main(void)
   TIM3->CCR4 = 90;
   HAL_TIM_Base_Start(&htim3);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
   HAL_TIM_Base_Start_IT(&htim16);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, GPIO_PIN_SET);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_11, GPIO_PIN_SET);
   // Start the HRTIM Timer C PWM outputs
-//  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_MASTER);
+ HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_MASTER);
 
-  // HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_A);
-  // HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_B);
-  // HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_C);
-  // HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_D);
-//  HAL_HRTIM_WaveformOutputStart(&hhrtim1, HRTIM_OUTPUT_TC1);
-//  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_C);
-//  HAL_HRTIM_WaveformOutputStart(&hhrtim1, HRTIM_OUTPUT_TC1 | HRTIM_OUTPUT_TC2
-//		  | HRTIM_OUTPUT_TA1 | HRTIM_OUTPUT_TA2
-//		  | HRTIM_OUTPUT_TB1 | HRTIM_OUTPUT_TB2
-//		  | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2);
+  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_A);
+  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_B);
+  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_C);
+  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_D);
+// HAL_HRTIM_WaveformOutputStart(&hhrtim1, HRTIM_OUTPUT_TC1);
+// HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_C);
+ HAL_HRTIM_WaveformOutputStart(&hhrtim1, HRTIM_OUTPUT_TC1 | HRTIM_OUTPUT_TC2
+		  | HRTIM_OUTPUT_TA1 | HRTIM_OUTPUT_TA2
+		  | HRTIM_OUTPUT_TB1 | HRTIM_OUTPUT_TB2
+		  | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2);
 //  HAL_HRTIM_WaveformSetCompare(&hhrtim1, HRTIM_TIMERINDEX_TIMER_C, HRTIM_COMPAREUNIT_1, 50);
 
 //  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
@@ -677,7 +677,6 @@ static void MX_HRTIM1_Init(void)
   {
     Error_Handler();
   }
-  
   if (HAL_HRTIM_WaveformOutputConfig(&hhrtim1, HRTIM_TIMERINDEX_TIMER_C, HRTIM_OUTPUT_TC1, &pOutputCfg) != HAL_OK)
   {
     Error_Handler();
@@ -937,6 +936,12 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, PFC_CTRL_out_Pin|RLY_CTRL_output_Pin|GPIO_PIN_10|SD_OD_output_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin : pfc_status_Pin */
+  GPIO_InitStruct.Pin = pfc_status_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(pfc_status_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PFC_CTRL_out_Pin RLY_CTRL_output_Pin PC10 SD_OD_output_Pin */
   GPIO_InitStruct.Pin = PFC_CTRL_out_Pin|RLY_CTRL_output_Pin|GPIO_PIN_10|SD_OD_output_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -1006,6 +1011,7 @@ int32_t moving_AC_voltage_measured_fun( int32_t current_val , int32_t MOV_AVG_SA
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   if(htim->Instance==TIM16){
     samples=moving_AC_voltage_measured_fun(ADC_VAL_1[2], 400.0f);
+    HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
   }
   
 }

@@ -63,6 +63,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define pfc_status_Pin GPIO_PIN_14
+#define pfc_status_GPIO_Port GPIOC
 #define PFC_CTRL_out_Pin GPIO_PIN_15
 #define PFC_CTRL_out_GPIO_Port GPIOC
 #define EXT_TEMP_adc_input_Pin GPIO_PIN_0
