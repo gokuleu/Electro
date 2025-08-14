@@ -35,16 +35,18 @@
 #define SAMPLES_PER_CYCLE 20
 
 #include <stdint.h>
-#include <string.h> // for memcpy
 
-#define MEDIAN_WINDOW 100
+#define MA_WINDOW 500  // window length in samples (e.g. 500 = 0.5s at 1kHz)
 
-uint16_t adc_buffer[MEDIAN_WINDOW] = {0};
-uint8_t buf_index = 0;
-uint8_t samples_collected = 0;
+static uint16_t ma_buf[MA_WINDOW];
+static uint32_t ma_sum = 0;
+static uint16_t ma_index = 0;
+static uint8_t ma_filled = 0;
 
-float sum_squares = 0;
+Sensing_raw_t Sensing_raw={0};
+Sensing_raw_filtered_t Sensing_raw_filtered={0};
 
+ErrorType_t error_status=0;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -70,21 +72,14 @@ TIM_HandleTypeDef htim16;
 uint16_t ADC_VAL_2[2];
 uint16_t ADC_VAL_1[7];
 volatile int count = 0;
-uint16_t voltage;
-uint16_t voltage_1;
-uint16_t voltage_2;
-uint16_t temp1;
-float rms_adc;
-float samples;
-float samples_f;
+uint16_t samples;
+
 #define N 500  // Number of samples (e.g., for 1 kHz sampling, this is 50 ms)
 char status=0;
 uint16_t filtered ;
-uint16_t buffer[N];
 uint32_t sum = 0;
 //uint8_t index = 0;
 
-uint16_t raw=0;
 //uint32_t sum =0;
 
 /* USER CODE END PV */
@@ -147,21 +142,27 @@ int main(void)
   MX_HRTIM1_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
-  if (HAL_ADC_Start_DMA(&hadc1, ADC_VAL_1, 7) != HAL_OK) {
-       Error_Handler();  // <-- Might be going here
+  if (HAL_ADC_Start_DMA(&hadc1, &Sensing_raw, 7) != HAL_OK) {
+       Error_Handler();
    }
-//  if (HAL_ADC_Start_DMA(&hadc2, ADC_VAL_2, 2) != HAL_OK) {
-//         Error_Handler();  // <-- Might be going here
-//     }
+#if ADC2_ENABLE
+ if (HAL_ADC_Start_DMA(&hadc2, ADC_VAL_2, 2) != HAL_OK) {
+        Error_Handler();  // <-- Might be going here
+    }
+#endif
   HAL_TIM_Base_Start(&htim15);
   TIM3->CCR4 = 90;
   HAL_TIM_Base_Start(&htim3);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);
+  #if PFC_DISABLE
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
+  #endif
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
   HAL_TIM_Base_Start_IT(&htim16);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, GPIO_PIN_SET);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_11, GPIO_PIN_SET);
+  #if LLC_ENABLE
   // Start the HRTIM Timer C PWM outputs
  HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_MASTER);
 
@@ -169,57 +170,23 @@ int main(void)
   HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_B);
   HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_C);
   HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_D);
-// HAL_HRTIM_WaveformOutputStart(&hhrtim1, HRTIM_OUTPUT_TC1);
-// HAL_HRTIM_WaveformCounterStart(&hhrtim1, HRTIM_TIMERID_TIMER_C);
+
  HAL_HRTIM_WaveformOutputStart(&hhrtim1, HRTIM_OUTPUT_TC1 | HRTIM_OUTPUT_TC2
 		  | HRTIM_OUTPUT_TA1 | HRTIM_OUTPUT_TA2
 		  | HRTIM_OUTPUT_TB1 | HRTIM_OUTPUT_TB2
 		  | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2);
 //  HAL_HRTIM_WaveformSetCompare(&hhrtim1, HRTIM_TIMERINDEX_TIMER_C, HRTIM_COMPAREUNIT_1, 50);
-
-//  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-//  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+#endif
+ma_init(Sensing_raw.vbulk);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-//  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
   while (1)
   {
 	// Send_on_CAN();
 	count++;
-
-//	voltage=ADC_VAL_1[6];
-
-	temp1=ADC_VAL_1[2];
-  ///////////
-
-// for (int i = 0; i < 50; i++)
-// {
-//   raw=ADC_VAL_1[2];
-//   sum=raw+sum;
-// }
-// samples=sum/50;
-// sum=0;
-
-// samples=moving_AC_voltage_measured_fun(ADC_VAL_1[2], 500);
-
-//voltage_2=moving_AC_voltage_measured_fun(voltage_1, 100);
-//
-// adc_buffer[buf_index] = voltage_1;
-// buf_index = (buf_index + 1) % MEDIAN_WINDOW;
-// if (samples_collected < MEDIAN_WINDOW) samples_collected++;
-//
-// // Apply filter only when buffer is filled at least once
-//  filtered = voltage_1;
-// if (samples_collected >= MEDIAN_WINDOW) {
-//     voltage_1 = median_filter(adc_buffer);
-// }
-// voltage=(3.3f/4096.0f)*((float)samples );
-// voltage_1=(1.33*(420.0f/4096.0f))*((float)samples );
-
- 
-  //////////
+  HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13); //pfc status
 
     /* USER CODE END WHILE */
 
@@ -882,7 +849,7 @@ static void MX_TIM16_Init(void)
   htim16.Instance = TIM16;
   htim16.Init.Prescaler = 63;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim16.Init.Period = 1000;
+  htim16.Init.Period = 20;  // main loop runs at 50khz
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim16.Init.RepetitionCounter = 0;
   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -955,103 +922,80 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-//float moving_AC_voltage_measured_fun( float current_val , float MOV_AVG_SAMPLE)   // 0.1 amp Batt_current_measured
-//{
-//  static float Prev_current_val;
-//  float Bus_Current_Error_value;
-//  Bus_Current_Error_value = (current_val - Prev_current_val);
-//  Prev_current_val += (Bus_Current_Error_value / MOV_AVG_SAMPLE);
-//  current_val = Prev_current_val ;
-//  return current_val ;
-//}
 
-int32_t moving_AC_voltage_measured_fun( int32_t current_val , int32_t MOV_AVG_SAMPLE)   // 0.1 amp Batt_current_measured
-{
-  static int32_t Prev_current_val;
-  int32_t Bus_Current_Error_value;
-  Bus_Current_Error_value = (current_val - Prev_current_val);
-  Prev_current_val += (Bus_Current_Error_value / MOV_AVG_SAMPLE);
-  current_val = Prev_current_val ;
-  return current_val ;
+void sanity_check(){
+  vbulk_check();
+  // output_voltage_check();
 }
 
-// int32_t moving_AC_voltage_measured_fun(int32_t current_val, int32_t MOV_AVG_SAMPLE)
-// {
-//     static int32_t Prev_current_val = 0;
-//     static int32_t Remainder = 0;
-
-//     int32_t error = current_val - Prev_current_val;
-//     int32_t scaled_error = error + Remainder; // add leftover
-//     int32_t delta = scaled_error / MOV_AVG_SAMPLE;
-
-//     Prev_current_val += delta;
-//     Remainder = scaled_error - delta * MOV_AVG_SAMPLE;  // retain what's left
-
-//     return Prev_current_val;
-// }
-
-
-//int32_t moving_AC_voltage_measured_fun(int32_t current_val, int32_t MOV_AVG_SAMPLE)
-//{
-//    static int32_t Prev_current_val = 0;
-//    static int32_t Accumulated_Error = 0;
-//
-//    int32_t error = current_val - Prev_current_val;
-//    Accumulated_Error += error;
-//
-//    int32_t delta = Accumulated_Error / MOV_AVG_SAMPLE;
-//
-//    Prev_current_val += delta;
-//    Accumulated_Error -= delta * MOV_AVG_SAMPLE;  // retain remainder
-//
-//    return Prev_current_val;
-//}
-
-
+void vbulk_check(){
+  static uint16_t vbulk_count;
+  static char vbulk_count_1ms;
+  //undervoltage check
+  if(Sensing_raw_filtered.vbulk_f<2700 && Sensing_raw_filtered.vbulk_f >0){
+    vbulk_count++;
+  }
+  else if(Sensing_raw_filtered.vbulk_f>3100 && Sensing_raw_filtered.vbulk_f < 4095){
+    vbulk_count++;
+  }
+  else{
+    vbulk_count=0;
+  }
+  if (vbulk_count>50)
+  {
+    vbulk_count=0;
+    vbulk_count_1ms++;
+    /* code */
+  }
+  if(vbulk_count_1ms>30){
+    error_status=VBULK_ERROR;
+  }
+}
+float ADC_to_vout(){
+  return ((Sensing_raw.vout)/4095)*100;
+}
+__attribute__((section(".ccmram")))
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   if(htim->Instance==TIM16){
-    samples=moving_AC_voltage_measured_fun(ADC_VAL_1[2], 400.0f);
-    HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
+    // samples=uSimpleDigitalLowPassFilter(ADC_VAL_1[2],&samples, 8);
+    Sensing_raw_filtered.vbulk_f=ma_update(Sensing_raw.vbulk); 
+    sanity_check();
+    ADC_to_vout();
+//    LLC_Control_CV_step();
+// samples=ADC_VAL_1[2];
+    
   }
   
 }
-//uint16_t get_dc_offset(uint16_t new_sample) {
-//    sum -= buffer[index];         // Remove old sample
-//    buffer[index] = new_sample;   // Insert new sample
-//    sum += new_sample;
-//
-//    index = (index + 1) % N;
-//
-//    return sum / N;  // DC offset estimate
-//}
-//uint32_t moving_AC_voltage_measured_fun( uint32_t current_val , uint32_t MOV_AVG_SAMPLE)   // 0.1 amp Batt_current_measured
-//{
-//   static uint32_t Prev_current_val;
-//   uint32_t Bus_Current_Error_value;
-//   Bus_Current_Error_value = (current_val - Prev_current_val);
-//   Prev_current_val += (Bus_Current_Error_value / MOV_AVG_SAMPLE);
-//   current_val = Prev_current_val ;
-//   return current_val ;
-//}
-//
-//
-//
-//uint16_t median_filter(uint16_t* buffer) {
-//    uint16_t temp[MEDIAN_WINDOW];
-//    memcpy(temp, buffer, sizeof(temp));
-//
-//    // Bubble sort
-//    for (int i = 0; i < MEDIAN_WINDOW - 1; ++i) {
-//        for (int j = 0; j < MEDIAN_WINDOW - i - 1; ++j) {
-//            if (temp[j] > temp[j + 1]) {
-//                uint16_t t = temp[j];
-//                temp[j] = temp[j + 1];
-//                temp[j + 1] = t;
-//            }
-//        }
-//    }
-//    return temp[MEDIAN_WINDOW / 2]; // Median
-//}
+// initialize the moving average with the first sample
+void ma_init(uint16_t first_sample) {
+    for (uint16_t i = 0; i < MA_WINDOW; i++) {
+        ma_buf[i] = first_sample;
+    }
+    ma_sum = (uint32_t)first_sample * MA_WINDOW;
+    ma_index = 0;
+    ma_filled = 1;
+}
+
+// update moving average with new sample and return filtered value
+uint16_t ma_update(uint16_t x) {
+    // subtract the oldest sample from sum
+    ma_sum -= ma_buf[ma_index];
+    // store the new sample
+    ma_buf[ma_index] = x;
+    // add the new sample to sum
+    ma_sum += x;
+
+    // increment and wrap index
+    ma_index++;
+    if (ma_index >= MA_WINDOW) {
+        ma_index = 0;
+        ma_filled = 1;
+    }
+
+    // compute average (integer division)
+    return (uint16_t)(ma_sum / (ma_filled ? MA_WINDOW : ma_index));
+}
 
 
 /* USER CODE END 4 */
