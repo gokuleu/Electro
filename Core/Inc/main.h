@@ -47,6 +47,10 @@ extern "C" {
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 
+#define ADC2_ENABLE 0
+#define PFC_DISABLE 0
+#define LLC_ENABLE 0
+
 /* USER CODE END EM */
 
 void HAL_HRTIM_MspPostInit(HRTIM_HandleTypeDef *hhrtim);
@@ -107,6 +111,32 @@ void Error_Handler(void);
 #define SD_OD_output_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
+typedef struct Sensing_raw_t{
+  uint16_t vout;
+  uint16_t iout;
+  uint16_t vbulk;
+  uint16_t ch4;
+  uint16_t ch5;
+  uint16_t ch6;
+  uint16_t ch7;
+} Sensing_raw_t;
+
+typedef struct Sensing_raw_filtered_t{
+  uint16_t vout_f;
+  uint16_t iout_f;
+  uint16_t vbulk_f;
+} Sensing_raw_filtered_t;
+
+typedef enum{
+ NO_ERROR,
+ OVERCURRENT_IOUT,
+ OVERVOLTAGE_VOUT
+} ErrorType_t;
+
+uint16_t ma_update(uint16_t x);
+void ma_init(uint16_t first_sample);
+extern Sensing_raw_t Sensing_raw;
+// extern ExtU_LLC_Control_CV_T control_in;
 
 /* USER CODE END Private defines */
 

@@ -108,6 +108,32 @@ static void MX_TIM16_Init(void);
   * @brief  The application entry point.
   * @retval int
   */
+#define WIN_SIZE 100   // window size
+
+static uint16_t buf[WIN_SIZE];
+static uint16_t index = 0;
+static uint8_t  filled = 0;
+
+uint16_t min_filter(uint16_t x) {
+    // Store new sample in circular buffer
+    buf[index] = x;
+    index++;
+    if (index >= WIN_SIZE) {
+        index = 0;
+        filled = 1;
+    }
+
+    // Find minimum in current buffer
+    uint16_t min_val = buf[0];
+    uint16_t limit = filled ? WIN_SIZE : index;
+    for (uint16_t i = 1; i < limit; i++) {
+        if (buf[i] < min_val) {
+            min_val = buf[i];
+        }
+    }
+
+    return min_val;
+}
 int main(void)
 {
 
@@ -806,7 +832,7 @@ static void MX_TIM15_Init(void)
   htim15.Instance = TIM15;
   htim15.Init.Prescaler = 63;
   htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim15.Init.Period = 65535;
+  htim15.Init.Period = 10;
   htim15.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim15.Init.RepetitionCounter = 0;
   htim15.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -922,51 +948,76 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-void sanity_check(){
-  vbulk_check();
-  // output_voltage_check();
-}
-
-void vbulk_check(){
-  static uint16_t vbulk_count;
-  static char vbulk_count_1ms;
-  //undervoltage check
-  if(Sensing_raw_filtered.vbulk_f<2700 && Sensing_raw_filtered.vbulk_f >0){
-    vbulk_count++;
-  }
-  else if(Sensing_raw_filtered.vbulk_f>3100 && Sensing_raw_filtered.vbulk_f < 4095){
-    vbulk_count++;
-  }
-  else{
-    vbulk_count=0;
-  }
-  if (vbulk_count>50)
-  {
-    vbulk_count=0;
-    vbulk_count_1ms++;
-    /* code */
-  }
-  if(vbulk_count_1ms>30){
-    error_status=VBULK_ERROR;
-  }
-}
+//
+//void sanity_check(){
+//  vbulk_check();
+//  // output_voltage_check();
+//}
+//
+//void vbulk_check(){
+//  static uint16_t vbulk_count;
+//  static char vbulk_count_1ms;
+//  //undervoltage check
+//  if(Sensing_raw_filtered.vbulk_f<2700 && Sensing_raw_filtered.vbulk_f >0){
+//    vbulk_count++;
+//  }
+//  else if(Sensing_raw_filtered.vbulk_f>3100 && Sensing_raw_filtered.vbulk_f < 4095){
+//    vbulk_count++;
+//  }
+//  else{
+//    vbulk_count=0;
+//  }
+//  if (vbulk_count>50)
+//  {
+//    vbulk_count=0;
+//    vbulk_count_1ms++;
+//    /* code */
+//  }
+//  if(vbulk_count_1ms>30){
+//    error_status=VBULK_ERROR;
+//  }
+//}
 float ADC_to_vout(){
   return ((Sensing_raw.vout)/4095)*100;
 }
-__attribute__((section(".ccmram")))
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-  if(htim->Instance==TIM16){
-    // samples=uSimpleDigitalLowPassFilter(ADC_VAL_1[2],&samples, 8);
-    Sensing_raw_filtered.vbulk_f=ma_update(Sensing_raw.vbulk); 
-    sanity_check();
-    ADC_to_vout();
-//    LLC_Control_CV_step();
-// samples=ADC_VAL_1[2];
-    
-  }
+__attribute__((section(".ccmram"))) 
+uint16_t uSimpleDigitalLowPassFilter(uint16_t hNoFilteredValue, uint16_t *phLastFilteredValue, uint8_t bDigitShift)
+{
+  uint16_t hFilteredValue = *phLastFilteredValue;
+  uint32_t wAux = 0;
   
+  /* yk = y(k-1) - (y(k-1)>>n) + (xk>>n) */
+//  filteredValue = filteredValue - (filteredValue >> digitShift) + (noFilteredValue >> digitShift);
+  wAux = (hFilteredValue << bDigitShift) - hFilteredValue + hNoFilteredValue;
+  wAux = (wAux >> bDigitShift);
+  hFilteredValue = (uint16_t)wAux;
+//  *phLastFilteredValue = hFilteredValue;           // no update: the new value is returned by function
+  
+  return hFilteredValue;
 }
+
+#define MA_WINDOW_SIZE 500  // Change this to your desired window size
+
+uint16_t movingAverage(uint16_t new_sample) {
+    static uint16_t buffer[MA_WINDOW_SIZE] = {0};
+    static uint32_t sum = 0;
+    static uint8_t idx = 0;
+    static uint8_t count = 0;
+
+    // Remove oldest sample from sum, then add the new sample
+    sum -= buffer[idx];
+    buffer[idx] = new_sample;
+    sum += new_sample;
+
+    idx = (idx + 1) % MA_WINDOW_SIZE;
+
+    // Keep track of how many samples have been added (for start-up)
+    if (count < MA_WINDOW_SIZE) count++;
+
+    return (uint16_t)(sum / count);
+}
+
+
 // initialize the moving average with the first sample
 void ma_init(uint16_t first_sample) {
     for (uint16_t i = 0; i < MA_WINDOW; i++) {
@@ -996,6 +1047,25 @@ uint16_t ma_update(uint16_t x) {
     // compute average (integer division)
     return (uint16_t)(ma_sum / (ma_filled ? MA_WINDOW : ma_index));
 }
+ __attribute__((section(".ccmram")))
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+  if(htim->Instance==TIM16){
+//   samples=uSimpleDigitalLowPassFilter(ADC_VAL_1[2],&samples, 8);
+    // samples=min_filter(ADC_VAL_1[2]);
+    // samples=movingAverage(ADC_VAL_1[2]);
+    
+	   Sensing_raw_filtered.vbulk_f=ma_update(Sensing_raw.vbulk);
+    
+    // sanity_check();
+    // ADC_to_vout();
+//    filtered=ADC_to_vout();
+//    LLC_Control_CV_step();
+// samples=ADC_VAL_1[2];
+    
+  }
+  
+}
+
 
 
 /* USER CODE END 4 */
