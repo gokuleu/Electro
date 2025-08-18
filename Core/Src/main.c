@@ -178,6 +178,7 @@ int main(void)
 //  HAL_HRTIM_WaveformSetCompare(&hhrtim1, HRTIM_TIMERINDEX_TIMER_C, HRTIM_COMPAREUNIT_1, 50);
 #endif
 ma_init(Sensing_raw.vbulk);
+void LLC_Control_CV_initialize();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -923,47 +924,61 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void sanity_check(){
-  vbulk_check();
-  // output_voltage_check();
+// void sanity_check(){
+//   vbulk_check();
+//   // output_voltage_check();
+// }
+
+// void vbulk_check(){
+//   static uint16_t vbulk_count;
+//   static char vbulk_count_1ms;
+//   //undervoltage check
+//   if(Sensing_raw_filtered.vbulk_f<2700 && Sensing_raw_filtered.vbulk_f >0){
+//     vbulk_count++;
+//   }
+//   else if(Sensing_raw_filtered.vbulk_f>3100 && Sensing_raw_filtered.vbulk_f < 4095){
+//     vbulk_count++;
+//   }
+//   else{
+//     vbulk_count=0;
+//   }
+//   if (vbulk_count>50)
+//   {
+//     vbulk_count=0;
+//     vbulk_count_1ms++;
+//     /* code */
+//   }
+//   if(vbulk_count_1ms>30){
+//     error_status=VBULK_ERROR;
+//   }
+// }
+__attribute__((section(".ccmram")))
+float ADC_to_vout(){
+  // return ((Sensing_raw.vout)/4095)*100;
+  return (Sensing_raw.vout)*0.02442002;
+}
+__attribute__((section(".ccmram")))
+float ADC_to_vin(){
+  return (Sensing_raw_filtered.vbulk_f)*0.02442002;
+}
+__attribute__((section(".ccmram")))
+float ADC_to_iout(){
+  return (Sensing_raw.iout-480)*0.032;
+  // (adc_counts-480)/sens_adc
 }
 
-void vbulk_check(){
-  static uint16_t vbulk_count;
-  static char vbulk_count_1ms;
-  //undervoltage check
-  if(Sensing_raw_filtered.vbulk_f<2700 && Sensing_raw_filtered.vbulk_f >0){
-    vbulk_count++;
-  }
-  else if(Sensing_raw_filtered.vbulk_f>3100 && Sensing_raw_filtered.vbulk_f < 4095){
-    vbulk_count++;
-  }
-  else{
-    vbulk_count=0;
-  }
-  if (vbulk_count>50)
-  {
-    vbulk_count=0;
-    vbulk_count_1ms++;
-    /* code */
-  }
-  if(vbulk_count_1ms>30){
-    error_status=VBULK_ERROR;
-  }
-}
-float ADC_to_vout(){
-  return ((Sensing_raw.vout)/4095)*100;
-}
+
 __attribute__((section(".ccmram")))
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   if(htim->Instance==TIM16){
     // samples=uSimpleDigitalLowPassFilter(ADC_VAL_1[2],&samples, 8);
     Sensing_raw_filtered.vbulk_f=ma_update(Sensing_raw.vbulk); 
-    sanity_check();
-    ADC_to_vout();
-//    LLC_Control_CV_step();
-// samples=ADC_VAL_1[2];
-    
+    // sanity_check();
+    LLC_Control_CV_U.V_out_LLC=ADC_to_vout();
+    LLC_Control_CV_U.I_out_LLC=ADC_to_iout();
+    LLC_Control_CV_U.V_in_LLC=ADC_to_vin();
+    LLC_Control_CV_step();
+    HRTIM1->sMasterRegs.MPER = 4096000000.0f/(LLC_Control_CV_Y.fs*2.0f);
   }
   
 }

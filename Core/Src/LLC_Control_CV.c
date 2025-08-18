@@ -16,6 +16,7 @@
 #include "LLC_Control_CV.h"
 #include <stdint.h>
 #include "LLC_Control_CV_types.h"
+#include "main.h"
 
 /* Named constants for Chart: '<S1>/Protection_States' */
 #define LLC_Control_CV_IN_CurrentSafe  ((uint8_t)1U)
@@ -1005,6 +1006,31 @@ void LLC_Control_CV_initialize(void)
   /* SystemInitialize for Atomic SubSystem: '<Root>/LLC_Control_CV' */
   /* InitializeConditions for DiscreteIntegrator: '<S40>/Integrator' */
   LLC_Control_CV_DW.Integrator_IC_LOADING = 1U;
+
+  LLC_Control_CV_U.V_ref=48;
+  LLC_Control_CV_U.Freq_low_limit=160000;
+  LLC_Control_CV_U.Freq_up_limit=240000;
+  LLC_Control_CV_U.V_ref_low_limit=40;
+  LLC_Control_CV_U.V_ref_up_limit=50;
+  LLC_Control_CV_U.OBC_Temp_C=0;
+  LLC_Control_CV_U.Thresholds.MaxCurrentLimit_A=50;
+  LLC_Control_CV_U.Thresholds.OTWarningLimit_C=5;
+  LLC_Control_CV_U.Thresholds.OTWarningLimit_C=10;
+  LLC_Control_CV_U.Thresholds.UVWarningLimit_LLC_Out_V=30;
+  LLC_Control_CV_U.Thresholds.UVErrorLimit_LLC_Out_V=25;
+  LLC_Control_CV_U.Thresholds.OVWarningLimit_LLC_Out_V=70;
+  LLC_Control_CV_U.Thresholds.OVErrorLimit_LLC_Out_V=75;
+  LLC_Control_CV_U.Thresholds.UVWarningLimit_LLC_In_V=355;
+  LLC_Control_CV_U.Thresholds.UVErrorLimit_LLC_In_V=350;
+  LLC_Control_CV_U.Thresholds.OVWarningLimit_LLC_In_V=425;
+  LLC_Control_CV_U.Thresholds.OVErrorLimit_LLC_In_V=430;
+  LLC_Control_CV_U.Thresholds.OCWarningLimit_A=45;
+  LLC_Control_CV_U.Thresholds.OCErrorLimit_A=50;
+  LLC_Control_CV_U.Thresholds.VoltageProtectionTimeout_msec=30;
+  LLC_Control_CV_U.Thresholds.TempProtectionTimeout_msec=30;
+  LLC_Control_CV_U.Thresholds.CurrentProtectionTimeout_msec=30;
+  
+
 
   /* End of SystemInitialize for SubSystem: '<Root>/LLC_Control_CV' */
 }
