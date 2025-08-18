@@ -32,6 +32,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "CAN.h"
+#include "LLC_Control_CV.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -107,7 +108,31 @@ void Error_Handler(void);
 #define SD_OD_output_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
+typedef struct Sensing_raw_t{
+  uint16_t vout;
+  uint16_t iout;
+  uint16_t vbulk;
+} Sensing_raw_t;
 
+typedef struct Sensing_raw_filtered_t{
+  uint16_t vout_f;
+  uint16_t iout_f;
+  uint16_t vbulk_f;
+} Sensing_raw_filtered_t;
+
+typedef enum{
+ NO_ERROR,
+ OVERCURRENT_IOUT,
+ OVERVOLTAGE_VOUT
+} ErrorType_t;
+
+uint16_t ma_update(uint16_t x);
+void ma_init(uint16_t first_sample);
+extern Sensing_raw_t Sensing_raw;
+// extern ExtU_LLC_Control_CV_T control_in;
+
+extern ExtU_LLC_Control_CV_T LLC_Control_CV_U;
+extern ExtY_LLC_Control_CV_T LLC_Control_CV_Y;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
