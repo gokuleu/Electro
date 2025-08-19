@@ -50,6 +50,7 @@ static void LLC_Contr_TemperatureProtection(void);
 static void LLC_Co_VoltageProtection_LLC_In(void);
 
 /* Function for Chart: '<S1>/Protection_States' */
+//__attribute__((section(".ccmram")))
 static void LLC_C_VoltageProtection_LLC_Out(void)
 {
   double tmp;
@@ -273,6 +274,7 @@ static void LLC_C_VoltageProtection_LLC_Out(void)
 }
 
 /* Function for Chart: '<S1>/Protection_States' */
+//__attribute__((section(".ccmram")))
 static void LLC_Contr_TemperatureProtection(void)
 {
   double tmp;
@@ -388,6 +390,7 @@ static void LLC_Contr_TemperatureProtection(void)
 }
 
 /* Function for Chart: '<S1>/Protection_States' */
+//__attribute__((section(".ccmram")))
 static void LLC_Co_VoltageProtection_LLC_In(void)
 {
   double tmp;
@@ -649,7 +652,7 @@ void LLC_Control_CV_step(void)
     /* Outport: '<Root>/VoltageFlag_LLC_In' */
     LLC_Control_CV_Y.VoltageFlag_LLC_In = SafeVoltage;
   } else {
-    LLC_C_VoltageProtection_LLC_Out();
+   LLC_C_VoltageProtection_LLC_Out();
     switch (LLC_Control_CV_DW.is_CurrentProtection) {
      case LLC_Control_CV_IN_CurrentSafe:
       /* Outport: '<Root>/CurrentFlag' */
@@ -738,8 +741,8 @@ void LLC_Control_CV_step(void)
       break;
     }
 
-    LLC_Contr_TemperatureProtection();
-    LLC_Co_VoltageProtection_LLC_In();
+   LLC_Contr_TemperatureProtection();
+   LLC_Co_VoltageProtection_LLC_In();
   }
 
   if (LLC_Control_CV_U.OBC_Temp_C > LLC_Control_CV_U.Thresholds.OTWarningLimit_C)

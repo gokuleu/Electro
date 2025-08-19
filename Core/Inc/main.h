@@ -108,10 +108,19 @@ void Error_Handler(void);
 #define SD_OD_output_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
+#define ADC2_ENABLE 0
+#define PFC_DISABLE 0
+#define LLC_ENABLE 1
+#define CONTROL_ENABLE 1
+
 typedef struct Sensing_raw_t{
   uint16_t vout;
   uint16_t iout;
   uint16_t vbulk;
+  uint16_t ch4;
+  uint16_t ch5;
+  uint16_t ch6;
+  uint16_t ch7;
 } Sensing_raw_t;
 
 typedef struct Sensing_raw_filtered_t{

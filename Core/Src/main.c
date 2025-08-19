@@ -159,7 +159,6 @@ int main(void)
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
   #endif
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
-  HAL_TIM_Base_Start_IT(&htim16);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, GPIO_PIN_SET);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_11, GPIO_PIN_SET);
   #if LLC_ENABLE
@@ -178,7 +177,8 @@ int main(void)
 //  HAL_HRTIM_WaveformSetCompare(&hhrtim1, HRTIM_TIMERINDEX_TIMER_C, HRTIM_COMPAREUNIT_1, 50);
 #endif
 ma_init(Sensing_raw.vbulk);
-void LLC_Control_CV_initialize();
+LLC_Control_CV_initialize();
+HAL_TIM_Base_Start_IT(&htim16);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -187,6 +187,7 @@ void LLC_Control_CV_initialize();
   {
 	// Send_on_CAN();
 	count++;
+    Sensing_raw_filtered.vbulk_f=ma_update(Sensing_raw.vbulk);
   HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13); //pfc status
 
     /* USER CODE END WHILE */
@@ -807,7 +808,7 @@ static void MX_TIM15_Init(void)
   htim15.Instance = TIM15;
   htim15.Init.Prescaler = 63;
   htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim15.Init.Period = 65535;
+  htim15.Init.Period = 10;
   htim15.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim15.Init.RepetitionCounter = 0;
   htim15.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -952,16 +953,16 @@ static void MX_GPIO_Init(void)
 //     error_status=VBULK_ERROR;
 //   }
 // }
-__attribute__((section(".ccmram")))
+// __attribute__((section(".ccmram")))
 float ADC_to_vout(){
   // return ((Sensing_raw.vout)/4095)*100;
   return (Sensing_raw.vout)*0.02442002;
 }
-__attribute__((section(".ccmram")))
-float ADC_to_vin(){
-  return (Sensing_raw_filtered.vbulk_f)*0.02442002;
+// __attribute__((section(".ccmram")))
+float ADC_to_vbulk(){
+  return (Sensing_raw_filtered.vbulk_f)*0.1367;
 }
-__attribute__((section(".ccmram")))
+// __attribute__((section(".ccmram")))
 float ADC_to_iout(){
   return (Sensing_raw.iout-480)*0.032;
   // (adc_counts-480)/sens_adc
@@ -972,13 +973,17 @@ __attribute__((section(".ccmram")))
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   if(htim->Instance==TIM16){
     // samples=uSimpleDigitalLowPassFilter(ADC_VAL_1[2],&samples, 8);
-    Sensing_raw_filtered.vbulk_f=ma_update(Sensing_raw.vbulk); 
     // sanity_check();
-    LLC_Control_CV_U.V_out_LLC=ADC_to_vout();
-    LLC_Control_CV_U.I_out_LLC=ADC_to_iout();
-    LLC_Control_CV_U.V_in_LLC=ADC_to_vin();
-    LLC_Control_CV_step();
-    HRTIM1->sMasterRegs.MPER = 4096000000.0f/(LLC_Control_CV_Y.fs*2.0f);
+//    LLC_Control_CV_U.V_out_LLC=ADC_to_vout();
+//    LLC_Control_CV_U.I_out_LLC=ADC_to_iout();
+//    LLC_Control_CV_U.V_in_LLC=ADC_to_vbulk();
+    // LLC_Control_CV_U.V_out_LLC=42;
+    // LLC_Control_CV_U.I_out_LLC=40;
+    // LLC_Control_CV_U.V_in_LLC=390;
+    #if CONTROL_ENABLE
+   LLC_Control_CV_step();
+//    HRTIM1->sMasterRegs.MPER = 4096000000.0f/(LLC_Control_CV_Y.fs*2.0f);
+    #endif
   }
   
 }
@@ -993,6 +998,7 @@ void ma_init(uint16_t first_sample) {
 }
 
 // update moving average with new sample and return filtered value
+// __attribute__((section(".ccmram")))
 uint16_t ma_update(uint16_t x) {
     // subtract the oldest sample from sum
     ma_sum -= ma_buf[ma_index];
