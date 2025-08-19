@@ -1014,9 +1014,9 @@ void LLC_Control_CV_initialize(void)
   LLC_Control_CV_U.Freq_low_limit=160000;
   LLC_Control_CV_U.Freq_up_limit=240000;
   LLC_Control_CV_U.V_ref_low_limit=40;
-  LLC_Control_CV_U.V_ref_up_limit=50;
+  LLC_Control_CV_U.V_ref_up_limit=60;
   LLC_Control_CV_U.OBC_Temp_C=0;
-  LLC_Control_CV_U.Thresholds.MaxCurrentLimit_A=50;
+  LLC_Control_CV_U.Thresholds.MaxCurrentLimit_A=40;
   LLC_Control_CV_U.Thresholds.OTWarningLimit_C=5;
   LLC_Control_CV_U.Thresholds.OTWarningLimit_C=10;
   LLC_Control_CV_U.Thresholds.UVWarningLimit_LLC_Out_V=30;
@@ -1032,9 +1032,8 @@ void LLC_Control_CV_initialize(void)
   LLC_Control_CV_U.Thresholds.VoltageProtectionTimeout_msec=30;
   LLC_Control_CV_U.Thresholds.TempProtectionTimeout_msec=30;
   LLC_Control_CV_U.Thresholds.CurrentProtectionTimeout_msec=30;
-  
-
-
+  LLC_Control_CV_U.Kp=100;
+  LLC_Control_CV_U.Ki=1000;
   /* End of SystemInitialize for SubSystem: '<Root>/LLC_Control_CV' */
 }
 

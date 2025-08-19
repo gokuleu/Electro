@@ -137,6 +137,9 @@ typedef enum{
 
 uint16_t ma_update(uint16_t x);
 void ma_init(uint16_t first_sample);
+float ADC_to_iout();
+float ADC_to_vbulk();
+float ADC_to_vout();
 extern Sensing_raw_t Sensing_raw;
 // extern ExtU_LLC_Control_CV_T control_in;
 

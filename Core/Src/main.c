@@ -808,7 +808,7 @@ static void MX_TIM15_Init(void)
   htim15.Instance = TIM15;
   htim15.Init.Prescaler = 63;
   htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim15.Init.Period = 10;
+  htim15.Init.Period = 500;
   htim15.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim15.Init.RepetitionCounter = 0;
   htim15.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -851,7 +851,7 @@ static void MX_TIM16_Init(void)
   htim16.Instance = TIM16;
   htim16.Init.Prescaler = 63;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim16.Init.Period = 20;  // main loop runs at 50khz
+  htim16.Init.Period = 499;  // main loop runs at 2khz
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim16.Init.RepetitionCounter = 0;
   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -974,15 +974,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   if(htim->Instance==TIM16){
     // samples=uSimpleDigitalLowPassFilter(ADC_VAL_1[2],&samples, 8);
     // sanity_check();
-//    LLC_Control_CV_U.V_out_LLC=ADC_to_vout();
-//    LLC_Control_CV_U.I_out_LLC=ADC_to_iout();
-//    LLC_Control_CV_U.V_in_LLC=ADC_to_vbulk();
     // LLC_Control_CV_U.V_out_LLC=42;
     // LLC_Control_CV_U.I_out_LLC=40;
     // LLC_Control_CV_U.V_in_LLC=390;
+
+   LLC_Control_CV_U.V_out_LLC=ADC_to_vout();
+   LLC_Control_CV_U.I_out_LLC=ADC_to_iout();
+   LLC_Control_CV_U.V_in_LLC=ADC_to_vbulk();
     #if CONTROL_ENABLE
    LLC_Control_CV_step();
-//    HRTIM1->sMasterRegs.MPER = 4096000000.0f/(LLC_Control_CV_Y.fs*2.0f);
+   HRTIM1->sMasterRegs.MPER = 4096000000.0f/(LLC_Control_CV_Y.fs*2.0f);
+
     #endif
   }
   
