@@ -34,6 +34,14 @@
 #define ADC_OFFSET 2048      // For 12-bit, mid-rail offset
 #define SAMPLES_PER_CYCLE 20
 
+
+#define NTC_PULL_UP_RESISTOR 10000
+#define Adc_max_COUNT 4095
+#define T_AMBIENT 25
+#define KELVIN_TO_CELSIUS 273.15
+#define BETA_VALUE 3984
+#define TEMP_AVG 1
+
 #include <stdint.h>
 
 #define MA_WINDOW 500  // window length in samples (e.g. 500 = 0.5s at 1kHz)
@@ -79,6 +87,10 @@ char status=0;
 uint16_t filtered ;
 uint32_t sum = 0;
 //uint8_t index = 0;
+
+// volatile uint16_t vout_sens=0;
+//     volatile uint16_t iout_sens=0;
+//     volatile float temp_out=0;
 
 //uint32_t sum =0;
 
@@ -134,6 +146,16 @@ uint16_t min_filter(uint16_t x) {
 
     return min_val;
 }
+float moving_Temperature_measured_fun_M( float current_val , float MOV_AVG_SAMPLE)   // 0.1 amp Batt_current_measured
+{
+    static float Prev_current_val;
+    float Bus_Current_Error_value;
+    Bus_Current_Error_value = (current_val - Prev_current_val);
+    Prev_current_val += (Bus_Current_Error_value / MOV_AVG_SAMPLE);
+    current_val = Prev_current_val ;
+    return current_val ;
+}
+
 int main(void)
 {
 
@@ -185,8 +207,8 @@ int main(void)
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
   #endif
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
-  HAL_TIM_Base_Start_IT(&htim16);
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, GPIO_PIN_SET);
+  // HAL_TIM_Base_Start_IT(&htim16);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_10, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_11, GPIO_PIN_SET);
   #if LLC_ENABLE
   // Start the HRTIM Timer C PWM outputs
@@ -212,6 +234,41 @@ ma_init(Sensing_raw.vbulk);
   {
 	// Send_on_CAN();
 	count++;
+    uint16_t vout_sens=(Sensing_raw.vout)*0.02442002;
+      uint16_t iout_sens=(Sensing_raw.iout-480)*0.032;
+      uint16_t vbulk_sen=0;
+
+      Sensing_raw_filtered.vout_f=vout_sens;
+      Sensing_raw_filtered.iout_f=iout_sens;
+     float temp_out=0;
+    Sensing_raw_filtered.vbulk_f=ma_update(Sensing_raw.vbulk);
+
+    Sensing_raw_filtered.vbulk_v=(Sensing_raw_filtered.vbulk_f)*0.1367;
+    double resistance = (Sensing_raw.ch5 * NTC_PULL_UP_RESISTOR)/(Adc_max_COUNT -Sensing_raw.ch5);
+		  	     double temp_K = resistance/NTC_PULL_UP_RESISTOR;
+		  	     temp_K = log(temp_K);
+		  	     temp_K /= BETA_VALUE;
+		  	     temp_K += 1.0/(T_AMBIENT + KELVIN_TO_CELSIUS);
+		  	     temp_K = 1.0/temp_K;
+		  	     temp_K -= KELVIN_TO_CELSIUS;
+		  	   temp_out = moving_Temperature_measured_fun_M(temp_K, TEMP_AVG);
+     if ((vout_sens>50)||(iout_sens>5)||(temp_out>45))
+     {
+       HRTIM1->sMasterRegs.MPER=0;
+       HAL_HRTIM_WaveformCounterStop(&hhrtim1, HRTIM_TIMERID_MASTER);
+
+   HAL_HRTIM_WaveformCounterStop(&hhrtim1, HRTIM_TIMERID_TIMER_A);
+   HAL_HRTIM_WaveformCounterStop(&hhrtim1, HRTIM_TIMERID_TIMER_B);
+   HAL_HRTIM_WaveformCounterStop(&hhrtim1, HRTIM_TIMERID_TIMER_C);
+   HAL_HRTIM_WaveformCounterStop(&hhrtim1, HRTIM_TIMERID_TIMER_D);
+
+  HAL_HRTIM_WaveformOutputStop(&hhrtim1, HRTIM_OUTPUT_TC1 | HRTIM_OUTPUT_TC2
+ 		  | HRTIM_OUTPUT_TA1 | HRTIM_OUTPUT_TA2
+ 		  | HRTIM_OUTPUT_TB1 | HRTIM_OUTPUT_TB2
+ 		  | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2);
+       /* code */
+     }
+   
   HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13); //pfc status
 
     /* USER CODE END WHILE */
@@ -557,7 +614,7 @@ static void MX_HRTIM1_Init(void)
   {
     Error_Handler();
   }
-  pTimeBaseCfg.Period = 11702;
+  pTimeBaseCfg.Period = 5390;
   pTimeBaseCfg.RepetitionCounter = 0x00;
   pTimeBaseCfg.PrescalerRatio = HRTIM_PRESCALERRATIO_MUL32;
   pTimeBaseCfg.Mode = HRTIM_MODE_CONTINUOUS;
@@ -875,7 +932,7 @@ static void MX_TIM16_Init(void)
   htim16.Instance = TIM16;
   htim16.Init.Prescaler = 63;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim16.Init.Period = 20;  // main loop runs at 50khz
+  htim16.Init.Period = 200;  // main loop runs at 50khz
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim16.Init.RepetitionCounter = 0;
   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -1047,14 +1104,11 @@ uint16_t ma_update(uint16_t x) {
     // compute average (integer division)
     return (uint16_t)(ma_sum / (ma_filled ? MA_WINDOW : ma_index));
 }
- __attribute__((section(".ccmram")))
+// __attribute__((section(".ccmram")))
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   if(htim->Instance==TIM16){
-//   samples=uSimpleDigitalLowPassFilter(ADC_VAL_1[2],&samples, 8);
-    // samples=min_filter(ADC_VAL_1[2]);
-    // samples=movingAverage(ADC_VAL_1[2]);
+     
     
-	   Sensing_raw_filtered.vbulk_f=ma_update(Sensing_raw.vbulk);
     
     // sanity_check();
     // ADC_to_vout();

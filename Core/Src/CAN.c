@@ -17,35 +17,35 @@ extern float rms_adc;
 
 uint8_t RxData[8];
 uint8_t TxData[8];
-float temp_out;
+// float temp_out;
 
-float moving_Temperature_measured_fun_M( float current_val , float MOV_AVG_SAMPLE)   // 0.1 amp Batt_current_measured
-{
-    static float Prev_current_val;
-    float Bus_Current_Error_value;
-    Bus_Current_Error_value = (current_val - Prev_current_val);
-    Prev_current_val += (Bus_Current_Error_value / MOV_AVG_SAMPLE);
-    current_val = Prev_current_val ;
-    return current_val ;
-}
+// float moving_Temperature_measured_fun_M( float current_val , float MOV_AVG_SAMPLE)   // 0.1 amp Batt_current_measured
+// {
+//     static float Prev_current_val;
+//     float Bus_Current_Error_value;
+//     Bus_Current_Error_value = (current_val - Prev_current_val);
+//     Prev_current_val += (Bus_Current_Error_value / MOV_AVG_SAMPLE);
+//     current_val = Prev_current_val ;
+//     return current_val ;
+// }
 
 void Send_on_CAN(){
 	  uint32_t time_count = HAL_GetTick();
 	  static uint32_t Prev_time = 0;
-	  uint8_t tempxxxx;
+//	  uint8_t tempxxxx;
 	  uint16_t rms_input_voltage=0;
 			  rms_input_voltage=rms_adc;
 	  if(time_count - Prev_time > 100){
 		  	Prev_time = time_count;
-		  	double resistance = (ADC_VAL_1[4] * NTC_PULL_UP_RESISTOR)/(Adc_max_COUNT - ADC_VAL_1[4]);
-		  	     double temp_K = resistance/NTC_PULL_UP_RESISTOR;
-		  	     temp_K = log(temp_K);
-		  	     temp_K /= BETA_VALUE;
-		  	     temp_K += 1.0/(T_AMBIENT + KELVIN_TO_CELSIUS);
-		  	     temp_K = 1.0/temp_K;
-		  	     temp_K -= KELVIN_TO_CELSIUS;
-		  	   temp_out = moving_Temperature_measured_fun_M(temp_K, TEMP_AVG);
-		  	 tempxxxx=temp_out;
+		  	// double resistance = (ADC_VAL_1[4] * NTC_PULL_UP_RESISTOR)/(Adc_max_COUNT - ADC_VAL_1[4]);
+		  	//      double temp_K = resistance/NTC_PULL_UP_RESISTOR;
+		  	//      temp_K = log(temp_K);
+		  	//      temp_K /= BETA_VALUE;
+		  	//      temp_K += 1.0/(T_AMBIENT + KELVIN_TO_CELSIUS);
+		  	//      temp_K = 1.0/temp_K;
+		  	//      temp_K -= KELVIN_TO_CELSIUS;
+		  	//    temp_out = moving_Temperature_measured_fun_M(temp_K, TEMP_AVG);
+		  	//  tempxxxx=temp_out;
 
 
 		  	TxData[0] = ADC_VAL_1[0]&0xff;
@@ -55,7 +55,7 @@ void Send_on_CAN(){
 		  	TxData[4] = ADC_VAL_1[7]&0xff;
 		  	TxData[5] = (ADC_VAL_1[7]&0xff00)>>8;
 //		  	TxData[6] = ADC_VAL_1[3]&0xff;
-		  	TxData[7] = tempxxxx;
+//		  	TxData[7] = tempxxxx;
 
 		  	Transmit_On_CAN(0x18FF50E5, TxData);
 			TxData[0] = (rms_input_voltage)&0xff;
@@ -65,7 +65,7 @@ void Send_on_CAN(){
 			TxData[4] = ADC_VAL_1[7]&0xff;
 			TxData[5] = (ADC_VAL_1[7]&0xff00)>>8;
 			TxData[6] = ADC_VAL_1[3]&0xff;
-			TxData[7] = tempxxxx;
+//			TxData[7] = tempxxxx;
 		  	Transmit_On_CAN(0x18FF50E6, TxData);
 		  }
 }

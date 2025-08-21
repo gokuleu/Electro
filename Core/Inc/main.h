@@ -48,8 +48,8 @@ extern "C" {
 /* USER CODE BEGIN EM */
 
 #define ADC2_ENABLE 0
-#define PFC_DISABLE 0
-#define LLC_ENABLE 0
+#define PFC_DISABLE 1
+#define LLC_ENABLE 1
 
 /* USER CODE END EM */
 
@@ -125,6 +125,7 @@ typedef struct Sensing_raw_filtered_t{
   uint16_t vout_f;
   uint16_t iout_f;
   uint16_t vbulk_f;
+  uint16_t vbulk_v;
 } Sensing_raw_filtered_t;
 
 typedef enum{
