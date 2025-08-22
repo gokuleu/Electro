@@ -445,15 +445,15 @@ static void MX_HRTIM1_Init(void)
   pBurstModeCfg.Prescaler = HRTIM_BURSTMODEPRESCALER_DIV1;
   pBurstModeCfg.PreloadEnable = HRIM_BURSTMODEPRELOAD_ENABLED;
   pBurstModeCfg.Trigger = HRTIM_BURSTMODETRIGGER_MASTER_RESET;
-  pBurstModeCfg.IdleDuration = 390;
-  pBurstModeCfg.Period = 400;
+  pBurstModeCfg.IdleDuration = 1432;
+  pBurstModeCfg.Period = 1440;
   if (HAL_HRTIM_BurstModeConfig(&hhrtim1, &pBurstModeCfg) != HAL_OK)
   {
     Error_Handler();
   }
-  pTimeBaseCfg.Period = 0xFFDF;
+  pTimeBaseCfg.Period = 0xFFFD;
   pTimeBaseCfg.RepetitionCounter = 0x00;
-  pTimeBaseCfg.PrescalerRatio = HRTIM_PRESCALERRATIO_MUL32;
+  pTimeBaseCfg.PrescalerRatio = HRTIM_PRESCALERRATIO_DIV1;
   pTimeBaseCfg.Mode = HRTIM_MODE_CONTINUOUS;
   if (HAL_HRTIM_TimeBaseConfig(&hhrtim1, HRTIM_TIMERINDEX_MASTER, &pTimeBaseCfg) != HAL_OK)
   {
@@ -477,6 +477,7 @@ static void MX_HRTIM1_Init(void)
     Error_Handler();
   }
   pTimeBaseCfg.Period = 8192;
+  pTimeBaseCfg.PrescalerRatio = HRTIM_PRESCALERRATIO_MUL32;
   if (HAL_HRTIM_TimeBaseConfig(&hhrtim1, HRTIM_TIMERINDEX_TIMER_A, &pTimeBaseCfg) != HAL_OK)
   {
     Error_Handler();
