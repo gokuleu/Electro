@@ -499,7 +499,7 @@ static void MX_HRTIM1_Init(void)
   pOutputCfg.SetSource = HRTIM_OUTPUTSET_TIMCMP1;
   pOutputCfg.ResetSource = HRTIM_OUTPUTRESET_TIMCMP1|HRTIM_OUTPUTRESET_MASTERPER;
   pOutputCfg.IdleMode = HRTIM_OUTPUTIDLEMODE_IDLE;
-  pOutputCfg.IdleLevel = HRTIM_OUTPUTIDLELEVEL_ACTIVE;
+  pOutputCfg.IdleLevel = HRTIM_OUTPUTIDLELEVEL_INACTIVE;
   pOutputCfg.FaultLevel = HRTIM_OUTPUTFAULTLEVEL_NONE;
   pOutputCfg.ChopperModeEnable = HRTIM_OUTPUTCHOPPERMODE_DISABLED;
   pOutputCfg.BurstModeEntryDelayed = HRTIM_OUTPUTBURSTMODEENTRY_REGULAR;
@@ -510,7 +510,6 @@ static void MX_HRTIM1_Init(void)
   pOutputCfg.SetSource = HRTIM_OUTPUTSET_NONE;
   pOutputCfg.ResetSource = HRTIM_OUTPUTRESET_NONE;
   pOutputCfg.IdleMode = HRTIM_OUTPUTIDLEMODE_NONE;
-  pOutputCfg.IdleLevel = HRTIM_OUTPUTIDLELEVEL_INACTIVE;
   if (HAL_HRTIM_WaveformOutputConfig(&hhrtim1, HRTIM_TIMERINDEX_TIMER_A, HRTIM_OUTPUT_TA2, &pOutputCfg) != HAL_OK)
   {
     Error_Handler();
