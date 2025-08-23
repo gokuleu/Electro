@@ -252,6 +252,7 @@ ma_init(Sensing_raw.vbulk);
 		  	     temp_K = 1.0/temp_K;
 		  	     temp_K -= KELVIN_TO_CELSIUS;
 		  	   temp_out = moving_Temperature_measured_fun_M(temp_K, TEMP_AVG);
+           #if PROTECTIONS
      if ((vout_sens>50)||(iout_sens>5)||(temp_out>45))
      {
        HRTIM1->sMasterRegs.MPER=0;
@@ -268,7 +269,7 @@ ma_init(Sensing_raw.vbulk);
  		  | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2);
        /* code */
      }
-   
+   #endif
   HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13); //pfc status
 
     /* USER CODE END WHILE */

@@ -50,6 +50,7 @@ extern "C" {
 #define ADC2_ENABLE 0
 #define PFC_DISABLE 1
 #define LLC_ENABLE 1
+#define PROTECTIONS 0
 
 /* USER CODE END EM */
 
