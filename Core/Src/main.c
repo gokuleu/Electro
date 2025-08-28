@@ -86,6 +86,7 @@ uint16_t samples;
 char status=0;
 uint16_t filtered ;
 uint32_t sum = 0;
+uint32_t freq_ramp_down = 380000;
 //uint8_t index = 0;
 
 // volatile uint16_t vout_sens=0;
@@ -615,7 +616,7 @@ static void MX_HRTIM1_Init(void)
   {
     Error_Handler();
   }
-  pTimeBaseCfg.Period = 11702;
+  pTimeBaseCfg.Period = 5390;
   pTimeBaseCfg.RepetitionCounter = 0x00;
   pTimeBaseCfg.PrescalerRatio = HRTIM_PRESCALERRATIO_MUL32;
   pTimeBaseCfg.Mode = HRTIM_MODE_CONTINUOUS;
@@ -1110,15 +1111,14 @@ uint16_t ma_update(uint16_t x) {
 // __attribute__((section(".ccmram")))
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   if(htim->Instance==TIM16){
-     
-    
-    
-    // sanity_check();
-    // ADC_to_vout();
-//    filtered=ADC_to_vout();
-//    LLC_Control_CV_step();
-// samples=ADC_VAL_1[2];
-    
+
+   static uint16_t loop_count=0;
+   if ( (loop_count <= 1000) )
+   {
+     loop_count++;
+     HRTIM1->sMasterRegs.MPER =4096000000.0f/(freq_ramp_down*2.0f);
+     freq_ramp_down=freq_ramp_down-205;
+   }
   }
   
 }
