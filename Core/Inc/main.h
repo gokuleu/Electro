@@ -47,7 +47,7 @@ extern "C" {
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 
-#define ADC2_ENABLE 0
+#define ADC2_ENABLE 1
 #define PFC_DISABLE 0
 #define LLC_ENABLE 0
 

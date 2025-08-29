@@ -212,6 +212,7 @@ ma_init(Sensing_raw.vbulk);
   {
 	// Send_on_CAN();
 	count++;
+  Sensing_raw_filtered.vbulk_f=ma_update(Sensing_raw.vbulk);
   HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13); //pfc status
 
     /* USER CODE END WHILE */
@@ -901,12 +902,12 @@ static void MX_DMA_Init(void)
   __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
-  /* DMA1_Channel1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-  /* DMA1_Channel2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
+//  /* DMA1_Channel1_IRQn interrupt configuration */
+//  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+//  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+//  /* DMA1_Channel2_IRQn interrupt configuration */
+//  HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
+//  HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
 
 }
 
@@ -1056,7 +1057,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
     // samples=min_filter(ADC_VAL_1[2]);
     // samples=movingAverage(ADC_VAL_1[2]);
     
-	   Sensing_raw_filtered.vbulk_f=ma_update(Sensing_raw.vbulk);
+	   
     
     // sanity_check();
     // ADC_to_vout();
