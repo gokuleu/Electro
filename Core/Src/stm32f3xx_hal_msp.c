@@ -346,6 +346,114 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* hcan)
 }
 
 /**
+* @brief COMP MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hcomp: COMP handle pointer
+* @retval None
+*/
+void HAL_COMP_MspInit(COMP_HandleTypeDef* hcomp)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  if(hcomp->Instance==COMP6)
+  {
+  /* USER CODE BEGIN COMP6_MspInit 0 */
+
+  /* USER CODE END COMP6_MspInit 0 */
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    /**COMP6 GPIO Configuration
+    PB11     ------> COMP6_INP
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_11;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /* COMP6 interrupt Init */
+    HAL_NVIC_SetPriority(COMP4_6_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(COMP4_6_IRQn);
+  /* USER CODE BEGIN COMP6_MspInit 1 */
+
+  /* USER CODE END COMP6_MspInit 1 */
+
+  }
+
+}
+
+/**
+* @brief COMP MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hcomp: COMP handle pointer
+* @retval None
+*/
+void HAL_COMP_MspDeInit(COMP_HandleTypeDef* hcomp)
+{
+  if(hcomp->Instance==COMP6)
+  {
+  /* USER CODE BEGIN COMP6_MspDeInit 0 */
+
+  /* USER CODE END COMP6_MspDeInit 0 */
+
+    /**COMP6 GPIO Configuration
+    PB11     ------> COMP6_INP
+    */
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_11);
+
+    /* COMP6 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(COMP4_6_IRQn);
+  /* USER CODE BEGIN COMP6_MspDeInit 1 */
+
+  /* USER CODE END COMP6_MspDeInit 1 */
+  }
+
+}
+
+/**
+* @brief DAC MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hdac: DAC handle pointer
+* @retval None
+*/
+void HAL_DAC_MspInit(DAC_HandleTypeDef* hdac)
+{
+  if(hdac->Instance==DAC2)
+  {
+  /* USER CODE BEGIN DAC2_MspInit 0 */
+
+  /* USER CODE END DAC2_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_DAC2_CLK_ENABLE();
+  /* USER CODE BEGIN DAC2_MspInit 1 */
+
+  /* USER CODE END DAC2_MspInit 1 */
+
+  }
+
+}
+
+/**
+* @brief DAC MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hdac: DAC handle pointer
+* @retval None
+*/
+void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac)
+{
+  if(hdac->Instance==DAC2)
+  {
+  /* USER CODE BEGIN DAC2_MspDeInit 0 */
+
+  /* USER CODE END DAC2_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_DAC2_CLK_DISABLE();
+  /* USER CODE BEGIN DAC2_MspDeInit 1 */
+
+  /* USER CODE END DAC2_MspDeInit 1 */
+  }
+
+}
+
+/**
 * @brief HRTIM MSP Initialization
 * This function configures the hardware resources used in this example
 * @param hhrtim: HRTIM handle pointer

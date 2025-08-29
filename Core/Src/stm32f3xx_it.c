@@ -58,6 +58,7 @@
 extern DMA_HandleTypeDef hdma_adc1;
 extern DMA_HandleTypeDef hdma_adc2;
 extern CAN_HandleTypeDef hcan;
+extern COMP_HandleTypeDef hcomp6;
 extern TIM_HandleTypeDef htim16;
 /* USER CODE BEGIN EV */
 
@@ -297,6 +298,20 @@ void TIM1_UP_TIM16_IRQHandler(void)
   /* USER CODE BEGIN TIM1_UP_TIM16_IRQn 1 */
 
   /* USER CODE END TIM1_UP_TIM16_IRQn 1 */
+}
+
+/**
+  * @brief This function handles COMP4 and COMP6 interrupts through EXTI lines 30 and 32.
+  */
+void COMP4_6_IRQHandler(void)
+{
+  /* USER CODE BEGIN COMP4_6_IRQn 0 */
+
+  /* USER CODE END COMP4_6_IRQn 0 */
+  HAL_COMP_IRQHandler(&hcomp6);
+  /* USER CODE BEGIN COMP4_6_IRQn 1 */
+
+  /* USER CODE END COMP4_6_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

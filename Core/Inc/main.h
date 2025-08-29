@@ -47,7 +47,7 @@ extern "C" {
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 
-#define ADC2_ENABLE 0
+#define ADC2_ENABLE 1
 #define PFC_DISABLE 1
 #define LLC_ENABLE 1
 #define PROTECTIONS 0
@@ -63,6 +63,7 @@ int32_t moving_AC_voltage_measured_fun( int32_t current_val , int32_t MOV_AVG_SA
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
+void comp_reconfig(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */
@@ -121,6 +122,11 @@ typedef struct Sensing_raw_t{
   uint16_t ch6;
   uint16_t ch7;
 } Sensing_raw_t;
+
+typedef struct Sensing_raw_2_t{
+  uint16_t ch1;
+  // uint16_t ch2;
+} Sensing_raw_2_t;
 
 typedef struct Sensing_raw_filtered_t{
   uint16_t vout_f;
