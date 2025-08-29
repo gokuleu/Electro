@@ -453,7 +453,7 @@ static void MX_HRTIM1_Init(void)
   {
     Error_Handler();
   }
-  pTimeBaseCfg.Period = 11702;
+  pTimeBaseCfg.Period = 8129;
   pTimeBaseCfg.RepetitionCounter = 0x00;
   pTimeBaseCfg.PrescalerRatio = HRTIM_PRESCALERRATIO_MUL32;
   pTimeBaseCfg.Mode = HRTIM_MODE_CONTINUOUS;
@@ -538,6 +538,7 @@ static void MX_HRTIM1_Init(void)
   {
     Error_Handler();
   }
+  pOutputCfg.Polarity = HRTIM_OUTPUTPOLARITY_LOW;
   if (HAL_HRTIM_WaveformOutputConfig(&hhrtim1, HRTIM_TIMERINDEX_TIMER_B, HRTIM_OUTPUT_TB1, &pOutputCfg) != HAL_OK)
   {
     Error_Handler();
@@ -549,6 +550,7 @@ static void MX_HRTIM1_Init(void)
   {
     Error_Handler();
   }
+  pOutputCfg.Polarity = HRTIM_OUTPUTPOLARITY_HIGH;
   if (HAL_HRTIM_WaveformOutputConfig(&hhrtim1, HRTIM_TIMERINDEX_TIMER_B, HRTIM_OUTPUT_TB2, &pOutputCfg) != HAL_OK)
   {
     Error_Handler();
